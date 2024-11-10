@@ -8,6 +8,9 @@ const app = express();
 configureMiddleware(app);
 const router = express.Router();
 
+router.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 router.get("/verify-email", async (req, res) => {
   const { token } = req.query;
