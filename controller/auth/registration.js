@@ -11,12 +11,9 @@ const app = express();
 configureMiddleware(app);
 const router = express.Router();
 
-router.post("/registration", async (req, res) => {
-  const { username, email, password } = req.body;
-
-  console.log(username,email,password);
+router.post("/auth/registration", async (req, res) => {
+  const { username, email, password,role} = req.body;  
   
-
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = uuidv4();
@@ -30,6 +27,7 @@ router.post("/registration", async (req, res) => {
           username: username,
           email: email,
           password: hashedPassword,
+          role: role,
           created_at: createdAt,
           updated_at: createdAt,
           is_verified: false,
