@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendVerificationEmail = (email, token) => {
-  const verificationLink = `http://localhost:3000/verify-email?token=${token}`;
+  const verificationLink = `https://shopify-blissserver.vercel.app/verify-email?token=${token}`;
   
   const mailOptions = {
     from: process.env.EMAIL_USER,
