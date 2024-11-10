@@ -3,9 +3,16 @@ import { google } from "googleapis";
 
 dotenv.config();
 
-const oauth2Client = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, "https://shopify-blissserver.vercel.app/auth/google/callback");
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID, 
+  process.env.GOOGLE_CLIENT_SECRET, 
+  "https://shopify-blissserver.vercel.app/auth/google/callback"
+);
 
-const scopes = ["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"];
+const scopes = [
+  "https://www.googleapis.com/auth/userinfo.email", 
+  "https://www.googleapis.com/auth/userinfo.profile"
+];
 
 const authorizationUrl = oauth2Client.generateAuthUrl({
   access_type: "offline",
