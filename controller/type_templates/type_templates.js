@@ -28,7 +28,7 @@ router.post("/api/type-templates", authenticateToken, async (req, res) => {
       .insert({
         type: type,
         icon: icon,
-        nameClass: nameClass,
+        name_class: nameClass,
         created_at: created_at,
         updated_at: created_at,
       })
@@ -130,7 +130,7 @@ router.put("/api/type-templates", authenticateToken, async (req, res) => {
       .update({
         type: type,
         icon: icon,
-        nameClass: nameClass,
+        name_class: nameClass,
         updated_at: updated_at,
       })
       .eq("type_template_id", id)
@@ -167,11 +167,7 @@ router.delete("/api/type-templates", authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, message: "ID is required" });
     }
 
-    const { data: typeTemplate, error: deleteError } = await supabase
-      .from("type_templates")
-      .delete()
-      .eq("type_template_id", id)
-      .select("*");
+    const { data: typeTemplate, error: deleteError } = await supabase.from("type_templates").delete().eq("type_template_id", id).select("*");
 
     if (deleteError) {
       console.error("Delete error:", deleteError);
@@ -194,6 +190,5 @@ router.delete("/api/type-templates", authenticateToken, async (req, res) => {
     });
   }
 });
-
 
 export default router;
