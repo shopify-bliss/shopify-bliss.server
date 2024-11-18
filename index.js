@@ -1,10 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+
 import regitration from "./controller/auth/registration.js";
 import verify from "./controller/auth/verifyEmail.js";
 import login from "./controller/auth/login.js";
 import typeTemplate from "./controller/type_templates/type_templates.js";
-import cookieParser from "cookie-parser";
 
 dotenv.config();
 

@@ -12,6 +12,13 @@ const router = express.Router();
 
 router.post("/api/type-templates", authenticateToken, async (req, res) => {
   try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have access to this resource",
+      });
+    }
+
     const { type, icon, nameClass } = req.body;
 
     const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
@@ -74,7 +81,7 @@ router.get("/api/type-templates", async (req, res) => {
   }
 });
 
-router.get('/api/type-templates-id', async (req, res) => {
+router.get("/api/type-templates-id", async (req, res) => {
   const { id } = req.query;
 
   // Memastikan ID disediakan dan valid
@@ -84,11 +91,7 @@ router.get('/api/type-templates-id', async (req, res) => {
 
   try {
     // Ambil data dari Supabase berdasarkan ID
-    const { data: item, error } = await supabase
-      .from('type_templates')
-      .select('*')
-      .eq('type_template_id', id)
-      .single();
+    const { data: item, error } = await supabase.from("type_templates").select("*").eq("type_template_id", id).single();
 
     // Tangani kesalahan yang terjadi saat query ke Supabase
     if (error) {
@@ -103,11 +106,94 @@ router.get('/api/type-templates-id', async (req, res) => {
 
     // Mengembalikan data jika ditemukan
     return res.status(200).json({ success: true, data: item });
-
   } catch (err) {
     console.error("Server error:", err.message);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+
+router.put("/api/type-templates", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    // Memastikan ID disediakan dan valid
+    if (!id) {
+      return res.status(400).json({ success: false, message: "ID is required" });
+    }
+
+    const { type, icon, nameClass } = req.body;
+
+    const updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
+
+    const { data: typeTemplate, error: updateError } = await supabase
+      .from("type_templates")
+      .update({
+        type: type,
+        icon: icon,
+        nameClass: nameClass,
+        updated_at: updated_at,
+      })
+      .eq("type_template_id", id)
+      .select("*");
+
+    if (updateError) {
+      console.error("Update error:", updateError);
+      return res.status(500).json({
+        success: false,
+        message: updateError.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Type has been updated",
+      data: typeTemplate,
+    });
+  } catch (error) {
+    console.error("Server error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
+router.delete("/api/type-templates", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    // Memastikan ID disediakan dan valid
+    if (!id) {
+      return res.status(400).json({ success: false, message: "ID is required" });
+    }
+
+    const { data: typeTemplate, error: deleteError } = await supabase
+      .from("type_templates")
+      .delete()
+      .eq("type_template_id", id)
+      .select("*");
+
+    if (deleteError) {
+      console.error("Delete error:", deleteError);
+      return res.status(500).json({
+        success: false,
+        message: deleteError.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Type has been deleted",
+      data: typeTemplate,
+    });
+  } catch (error) {
+    console.error("Server error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 
 export default router;
