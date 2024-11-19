@@ -21,7 +21,7 @@ router.post("/api/font", authenticateToken, async (req, res) => {
 
     const { name, fontClass, fontClassReverse } = req.body;
 
-    const created_at = moment().format("DD-MM-YYYYY HH:mm:ss");
+    const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
 
     const { data: font, error: insertError } = await supabase
       .from("fonts")
