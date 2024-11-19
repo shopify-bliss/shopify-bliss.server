@@ -58,7 +58,7 @@ router.post("/api/type-templates", authenticateToken, async (req, res) => {
 
 router.get("/api/type-templates", async (req, res) => {
   try {
-    const { data: typeTemplates, error: selectError } = await supabase.from("type_templates").select("*");
+    const { data: typeTemplates, error: selectError } = await supabase.from("type_templates").select("*").order("created_at", { ascending: true });
 
     if (selectError) {
       console.error("Select error:", selectError);
@@ -68,9 +68,15 @@ router.get("/api/type-templates", async (req, res) => {
       });
     }
 
+    const footerItems = typeTemplates.filter((item) => item.type === "Footer");
+    const otherItems = typeTemplates.filter((item) => item.type !== "Footer");
+
+    // Gabungkan data lainnya dengan footer di bagian akhir
+    const sortedData = [...otherItems, ...footerItems];
+
     return res.status(200).json({
       success: true,
-      data: typeTemplates,
+      data: sortedData,
     });
   } catch (e) {
     console.error("Server error:", e);
