@@ -24,7 +24,7 @@ router.post("/api/font", authenticateToken, async (req, res) => {
     const created_at = moment().format("DD-MM-YYYYY HH:mm:ss");
 
     const { data: font, error: insertError } = await supabase
-      .from("font")
+      .from("fonts")
       .insert({
         name: name,
         font_class: fontClass,
@@ -58,7 +58,7 @@ router.post("/api/font", authenticateToken, async (req, res) => {
 
 router.get("/api/font", async (req, res) => {
   try {
-    const { data: fonts, error: getError } = await supabase.from("font").select("*").order("created_at", { ascending: true });
+    const { data: fonts, error: getError } = await supabase.from("fonts").select("*").order("created_at", { ascending: true });
 
     if (getError) {
       console.error("Get error:", getError);
