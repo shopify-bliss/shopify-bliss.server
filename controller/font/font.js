@@ -82,4 +82,136 @@ router.get("/api/font", async (req, res) => {
   }
 });
 
+router.get("/api/font-id", async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Bad request: ID is required",
+      });
+    }
+
+    const { data: font, error: getError } = await supabase.from("fonts").select("*").eq("font_id", id);
+
+    if (getError) {
+      console.error("Get error:", getError);
+      return res.status(500).json({
+        success: false,
+        message: getError.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Font has been retrieved",
+      data: font,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
+router.put("/api/font", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Bad request: ID is required",
+      });
+    }
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have access to this resource",
+      });
+    }
+
+    const { name, fontClass, fontClassReverse } = req.body;
+
+    const updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
+
+    const { data: font, error: updateError } = await supabase
+      .from("fonts")
+      .update({
+        name: name,
+        font_class: fontClass,
+        font_class_reverse: fontClassReverse,
+        updated_at: updated_at,
+      })
+      .eq("font_id", id)
+      .select("*");
+
+    if (updateError) {
+      console.error("Update error:", updateError);
+      return res.status(500).json({
+        success: false,
+        message: updateError.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Font has been updated",
+      data: font,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
+router.delete("/api/font", authenticateToken, async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have access to this resource",
+      });
+    }
+
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Bad request: ID is required",
+      });
+    }
+
+    const { data: font, error: deleteError } = await supabase.from("fonts").delete().eq("font_id", id).select("*");
+
+    if (deleteError) {
+      console.error("Delete error:", deleteError);
+      return res.status(500).json({
+        success: false,
+        message: deleteError.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Font has been deleted",
+      data: font,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 export default router;
