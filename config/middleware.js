@@ -6,7 +6,7 @@ const configureMiddleware = (app) => {
   app.use(express.json());
   app.use(
     cors({
-      origin: ["*"],
+      origin: ["http://localhost:5173", "https://shopify-bliss.github.io"],
       methods: ["GET", "POST", "PUT", "OPTIONS", "DELETE"],
       credentials: true,
       optionsSuccessStatus: 200,

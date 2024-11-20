@@ -28,7 +28,7 @@ router.post("/api/type-templates", authenticateToken, async (req, res) => {
       .insert({
         type: type,
         icon: icon,
-        nameClass: nameClass,
+        name_class: nameClass,
         created_at: created_at,
         updated_at: created_at,
       })
@@ -58,7 +58,7 @@ router.post("/api/type-templates", authenticateToken, async (req, res) => {
 
 router.get("/api/type-templates", async (req, res) => {
   try {
-    const { data: typeTemplates, error: selectError } = await supabase.from("type_templates").select("*");
+    const { data: typeTemplates, error: selectError } = await supabase.from("type_templates").select("*").order("created_at", { ascending: true });
 
     if (selectError) {
       console.error("Select error:", selectError);
@@ -68,9 +68,15 @@ router.get("/api/type-templates", async (req, res) => {
       });
     }
 
+    const footerItems = typeTemplates.filter((item) => item.type === "Footer");
+    const otherItems = typeTemplates.filter((item) => item.type !== "Footer");
+
+    // Gabungkan data lainnya dengan footer di bagian akhir
+    const sortedData = [...otherItems, ...footerItems];
+
     return res.status(200).json({
       success: true,
-      data: typeTemplates,
+      data: sortedData,
     });
   } catch (e) {
     console.error("Server error:", e);
@@ -130,7 +136,7 @@ router.put("/api/type-templates", authenticateToken, async (req, res) => {
       .update({
         type: type,
         icon: icon,
-        nameClass: nameClass,
+        name_class: nameClass,
         updated_at: updated_at,
       })
       .eq("type_template_id", id)
@@ -167,11 +173,7 @@ router.delete("/api/type-templates", authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, message: "ID is required" });
     }
 
-    const { data: typeTemplate, error: deleteError } = await supabase
-      .from("type_templates")
-      .delete()
-      .eq("type_template_id", id)
-      .select("*");
+    const { data: typeTemplate, error: deleteError } = await supabase.from("type_templates").delete().eq("type_template_id", id).select("*");
 
     if (deleteError) {
       console.error("Delete error:", deleteError);
@@ -194,6 +196,5 @@ router.delete("/api/type-templates", authenticateToken, async (req, res) => {
     });
   }
 });
-
 
 export default router;
