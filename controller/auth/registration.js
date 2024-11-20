@@ -16,20 +16,15 @@ router.post("/auth/registration", async (req, res) => {
   
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = uuidv4();
-    const createdAt = new Date().toISOString();
 
     const { data, error } = await supabase
       .from("users")
       .insert([
         {
-          user_id: userId,
           username: username,
           email: email,
           password: hashedPassword,
           role: role,
-          created_at: createdAt,
-          updated_at: createdAt,
           is_verified: false,
         },
       ]);
