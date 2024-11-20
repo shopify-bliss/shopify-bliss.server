@@ -1,5 +1,4 @@
 import express from "express";
-import moment from "moment/moment.js";
 
 import configureMiddleware from "./../../config/middleware.js";
 import supabase from "./../../config/supabase.js";
@@ -21,16 +20,12 @@ router.post("/api/font", authenticateToken, async (req, res) => {
 
     const { name, fontClass, fontClassReverse } = req.body;
 
-    const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
-
     const { data: font, error: insertError } = await supabase
       .from("fonts")
       .insert({
         name: name,
         font_class: fontClass,
         font_class_reverse: fontClassReverse,
-        created_at: created_at,
-        updated_at: created_at,
       })
       .select("*");
 
@@ -103,6 +98,13 @@ router.get("/api/font-id", async (req, res) => {
       });
     }
 
+    if (font.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `Font with id = ${id} not found`,
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Font has been retrieved",
@@ -137,15 +139,12 @@ router.put("/api/font", authenticateToken, async (req, res) => {
 
     const { name, fontClass, fontClassReverse } = req.body;
 
-    const updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
-
     const { data: font, error: updateError } = await supabase
       .from("fonts")
       .update({
         name: name,
         font_class: fontClass,
         font_class_reverse: fontClassReverse,
-        updated_at: updated_at,
       })
       .eq("font_id", id)
       .select("*");

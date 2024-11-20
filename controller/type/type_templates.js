@@ -1,10 +1,9 @@
 import express from "express";
-import moment from "moment/moment.js";
 
-import configureMiddleware from "./../../config/middleware.js";
-import supabase from "./../../config/supabase.js";
+import configureMiddleware from "../../config/middleware.js";
+import supabase from "../../config/supabase.js";
 
-import authenticateToken from "./../../helper/token.js";
+import authenticateToken from "../../helper/token.js";
 
 const app = express();
 configureMiddleware(app);
@@ -21,16 +20,12 @@ router.post("/api/type-templates", authenticateToken, async (req, res) => {
 
     const { type, icon, nameClass } = req.body;
 
-    const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
-
     const { data: typeTemplate, error: insertError } = await supabase
       .from("type_templates")
       .insert({
         type: type,
         icon: icon,
         name_class: nameClass,
-        created_at: created_at,
-        updated_at: created_at,
       })
       .select("*");
 
@@ -129,15 +124,12 @@ router.put("/api/type-templates", authenticateToken, async (req, res) => {
 
     const { type, icon, nameClass } = req.body;
 
-    const updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
-
     const { data: typeTemplate, error: updateError } = await supabase
       .from("type_templates")
       .update({
         type: type,
         icon: icon,
         name_class: nameClass,
-        updated_at: updated_at,
       })
       .eq("type_template_id", id)
       .select("*");

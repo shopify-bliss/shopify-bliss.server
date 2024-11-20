@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import regitration from "./controller/auth/registration.js";
 import verify from "./controller/auth/verifyEmail.js";
 import login from "./controller/auth/login.js";
-import typeTemplate from "./controller/type_templates/type_templates.js";
+import typeTemplate from "./controller/type/type_templates.js";
 import font from "./controller/font/font.js";
 
 import configureMiddleware from "./config/middleware.js";
