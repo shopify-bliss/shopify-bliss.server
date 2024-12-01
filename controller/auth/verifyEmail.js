@@ -25,18 +25,6 @@ router.get("/verify-email", async (req, res) => {
       .update({ is_verified: true }) // Pastikan ada kolom is_verified di tabel "users"
       .match({ email });
 
-    // Jika terjadi error atau user tidak ditemukan
-    if (error || data.length === 0) {
-      return res.status(400).send(`
-        <html>
-          <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-            <h1 style="color: red;">Invalid or expired token</h1>
-            <p>Please request a new verification email.</p>
-          </body>
-        </html>
-      `);
-    }
-
     // Jika verifikasi berhasil
     res.status(200).send(`
       <html>
