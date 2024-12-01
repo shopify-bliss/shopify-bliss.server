@@ -7,7 +7,9 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID, 
   process.env.GOOGLE_CLIENT_SECRET, 
   "https://shopify-blissserver.vercel.app/auth/google/callback",
-  "https://shopify-bliss.github.io/auth/google/callback"
+  "https://shopify-bliss.github.io/auth/google/callback",
+  "http://localhost:3000/auth/google/callback",
+  "http://localhost:5173/auth/google/callback",
 );
 
 const scopes = [

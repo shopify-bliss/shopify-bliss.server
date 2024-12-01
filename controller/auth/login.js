@@ -191,14 +191,8 @@ router.post("/auth/login", async (req, res) => {
     // Mengirim token dalam response
     res.json({
       message: "Login successfully.",
-      data: {
-        user_id: user.user_id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
-      token,
     });
+    return res.redirect(`/`);
   } catch (error) {
     res.status(500).json({ message: "An error occurred during login", error });
   }
