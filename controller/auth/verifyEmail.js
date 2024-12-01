@@ -17,12 +17,12 @@ router.get("/verify-email", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { userId, email } = decoded;
+    const {  email } = decoded;
 
     const { data, error } = await supabase
       .from("users")
       .update({ is_verified: true }) // Field "verified" harus ada pada tabel "users"
-      .match({ user_id: userId, email });
+      .match({  email });
 
     // if (error || data.length === 0) {
     //   return res.status(400).json({ message: "Invalid or expired token" });
