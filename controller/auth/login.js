@@ -20,7 +20,6 @@ router.get("/auth/google", async (req, res) => {
 });
 
 // Callback Google setelah login berhasil
-// Callback Google setelah login berhasil
 router.get("/auth/google/callback", async (req, res) => {
   const { code } = req.query;
 
@@ -103,10 +102,10 @@ router.get("/auth/google/callback", async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
+      sameSite: "None",
+      domain: "https://shopify-blissserver.vercel.app",
     });
-
-    // Mengirim token dalam response
-    return res.redirect('https://shopify-bliss.github.io');
+    return res.redirect("https://shopify-bliss.github.io");
   } catch (error) {
     console.error("Error during Google OAuth:", error?.response?.data || error.message);
     return res.status(500).json({
