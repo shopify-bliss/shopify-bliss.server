@@ -10,6 +10,7 @@ const oauth2Client = new google.auth.OAuth2(
   "https://shopify-bliss.github.io/auth/google/callback",
   "http://localhost:3000/auth/google/callback",
   "http://localhost:5173/auth/google/callback",
+  "http://127.0.0.1:5500/auth/google/callback",
 );
 
 const scopes = [

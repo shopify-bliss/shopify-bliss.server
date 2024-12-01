@@ -47,11 +47,7 @@ router.get("/auth/google/callback", async (req, res) => {
     const username = data.name || data.email;
 
     // Cek apakah user sudah ada di Supabase
-    const { data: existingUser, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", data.email)
-      .single(); // Mengambil satu data jika ada
+    const { data: existingUser, error } = await supabase.from("users").select("*").eq("email", data.email).single(); // Mengambil satu data jika ada
 
     if (error && error.code !== "PGRST116") {
       // Jika error bukan karena data tidak ditemukan
@@ -110,16 +106,10 @@ router.get("/auth/google/callback", async (req, res) => {
     });
 
     // Mengirim token dalam response
-    return res.json({
-      data: {
-        user: {
-          user_id: user.user_id,
-          username: user.username,
-          email: user.email,
-        },
-        token,
-      },
+    res.json({
+      message: "Login successfully.",
     });
+    return res.redirect(`/`);
   } catch (error) {
     console.error("Error during Google OAuth:", error?.response?.data || error.message);
     return res.status(500).json({
@@ -191,8 +181,14 @@ router.post("/auth/login", async (req, res) => {
     // Mengirim token dalam response
     res.json({
       message: "Login successfully.",
+      data: {
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+      token,
     });
-    return res.redirect(`/`);
   } catch (error) {
     res.status(500).json({ message: "An error occurred during login", error });
   }
