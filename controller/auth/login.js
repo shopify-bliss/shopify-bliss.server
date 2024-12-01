@@ -106,7 +106,7 @@ router.get("/auth/google/callback", async (req, res) => {
     });
 
     // Mengirim token dalam response
-    return res.redirect(`/`);
+    return res.redirect('https://shopify-bliss.github.io');
   } catch (error) {
     console.error("Error during Google OAuth:", error?.response?.data || error.message);
     return res.status(500).json({
