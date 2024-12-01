@@ -33,7 +33,7 @@ router.get("/verify-email", async (req, res) => {
 
     // Redirect ke halaman login
     return res.redirect(
-      `https://shopify-bliss.github.io/login?message=Email verified successfully.`
+      `https://shopify-bliss.vercel.app/login?message=Email%20verified%20successfully.`
     );
   } catch (error) {
     return res.redirect(
