@@ -31,18 +31,16 @@ router.get("/verify-email", async (req, res) => {
       });
     }
 
-    // Kirimkan JSON dengan URL redirect
-    return res.status(200).json({
-      success: true,
-      message: "Email verified successfully.",
-      redirectUrl: "https://shopify-bliss.github.io/login",
-    });
+    // Redirect ke halaman login
+    return res.redirect(
+      `https://shopify-bliss.github.io/login?message=Email verified successfully.`
+    );
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: "Invalid or expired token",
-    });
+    return res.redirect(
+      `https://shopify-bliss.github.io/login?message=Invalid or expired token`
+    );
   }
 });
+
 
 export default router;
