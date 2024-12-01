@@ -20,6 +20,7 @@ router.get("/auth/google", async (req, res) => {
 });
 
 // Callback Google setelah login berhasil
+// Callback Google setelah login berhasil
 router.get("/auth/google/callback", async (req, res) => {
   const { code } = req.query;
 
@@ -46,11 +47,24 @@ router.get("/auth/google/callback", async (req, res) => {
     const username = data.name || data.email;
 
     // Cek apakah user sudah ada di Supabase
-    const { data: existingUser, error } = await supabase.from("users").select("*").eq("email", data.email).single();
+    const { data: existingUser, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", data.email)
+      .single(); // Mengambil satu data jika ada
+
+    if (error && error.code !== "PGRST116") {
+      // Jika error bukan karena data tidak ditemukan
+      console.error("Error checking user existence:", error.message);
+      return res.status(500).json({
+        message: "An error occurred while checking the user.",
+        error: error.message,
+      });
+    }
 
     let user;
 
-    if (error || !existingUser) {
+    if (!existingUser) {
       // Jika user belum ada, buat user baru
       const { data: newUser, error: insertError } = await supabase
         .from("users")
@@ -73,14 +87,8 @@ router.get("/auth/google/callback", async (req, res) => {
 
       user = newUser;
     } else {
+      // Jika user sudah ada, gunakan data user yang ada
       user = existingUser;
-    }
-
-    // Cek apakah `user` memiliki `user_id`
-    if (!user || !user.user_id) {
-      return res.status(500).json({
-        message: "User created but missing user_id.",
-      });
     }
 
     // Membuat token JWT
@@ -95,6 +103,11 @@ router.get("/auth/google/callback", async (req, res) => {
         expiresIn: "1h",
       }
     );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+    });
 
     // Mengirim token dalam response
     return res.json({
