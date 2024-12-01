@@ -15,35 +15,33 @@ router.get("/verify-email", async (req, res) => {
   const { token } = req.query;
 
   try {
-    // Verifikasi token JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const { email } = decoded;
 
-    // Update status is_verified di Supabase
     const { data, error } = await supabase
       .from("users")
-      .update({ is_verified: true }) // Pastikan ada kolom is_verified di tabel "users"
+      .update({ is_verified: true })
       .match({ email });
 
-    // Jika verifikasi berhasil
-    res.status(200).send(`
-      <html>
-        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-          <h1 style="color: green;">Email verified successfully!</h1>
-          <p>Your email has been verified. Please <a href="/login">login</a> to continue.</p>
-        </body>
-      </html>
-    `);
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to verify email",
+        error,
+      });
+    }
+
+    // Kirimkan JSON dengan URL redirect
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully.",
+      redirectUrl: "https://shopify-bliss.github.io/login",
+    });
   } catch (error) {
-    // Jika token tidak valid atau kedaluwarsa
-    res.status(400).send(`
-      <html>
-        <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
-          <h1 style="color: red;">Invalid or expired token</h1>
-          <p>Please request a new verification email.</p>
-        </body>
-      </html>
-    `);
+    return res.status(400).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
   }
 });
 
