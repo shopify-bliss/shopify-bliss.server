@@ -109,10 +109,18 @@ router.get("/auth/google/callback", async (req, res) => {
     res.cookie("shopify-bliss", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
-      domain: "https://shopify-blissserver.vercel.app",
     });
-    return res.redirect("https://shopify-bliss.vercel.app");
+
+    res.json({
+      message: "Login successfully.",
+      data: {
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+      token,
+    });
   } catch (error) {
     console.error("Error during Google OAuth:", error?.response?.data || error.message);
     return res.status(500).json({
