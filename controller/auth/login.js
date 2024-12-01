@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import { google } from "googleapis";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import moment from "moment";
+
 import supabase from "./../../config/supabase.js";
 import { oauth2Client, authorizationUrl } from "./../../helper/googleApis.js";
-
 import configureMiddleware from "./../../config/middleware.js";
 
 dotenv.config();
@@ -22,6 +23,8 @@ router.get("/auth/google", async (req, res) => {
 // Callback Google setelah login berhasil
 router.get("/auth/google/callback", async (req, res) => {
   const { code } = req.query;
+
+  const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
 
   try {
     // Mendapatkan token dari Google
@@ -67,7 +70,11 @@ router.get("/auth/google/callback", async (req, res) => {
           {
             email: data.email,
             username: username,
-            password: null, // Karena login menggunakan Google, password tidak diperlukan
+            password: null,
+            created_at: created_at,
+            updated_at: created_at,
+            is_verified: true,
+            role: "customer",
           },
         ])
         .select("*")
@@ -99,7 +106,7 @@ router.get("/auth/google/callback", async (req, res) => {
       }
     );
 
-    res.cookie("token", token, {
+    res.cookie("shopify-bliss", token, {
       httpOnly: true,
       secure: true,
       sameSite: "None",
@@ -169,7 +176,7 @@ router.post("/auth/login", async (req, res) => {
       }
     );
 
-    res.cookie("token", token, {
+    res.cookie("shopify-bliss", token, {
       httpOnly: true,
       secure: true,
     });
