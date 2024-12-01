@@ -106,9 +106,6 @@ router.get("/auth/google/callback", async (req, res) => {
     });
 
     // Mengirim token dalam response
-    res.json({
-      message: "Login successfully.",
-    });
     return res.redirect(`/`);
   } catch (error) {
     console.error("Error during Google OAuth:", error?.response?.data || error.message);
