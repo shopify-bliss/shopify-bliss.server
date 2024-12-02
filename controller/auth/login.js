@@ -187,7 +187,8 @@ router.post("/auth/login", async (req, res) => {
     res.cookie("shopify-bliss", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "None",
+      domain: "https://shopify-bliss.vercel.app",
       maxAge: 86400000,
       path: "/", // Cookie tersedia di semua path
     });
