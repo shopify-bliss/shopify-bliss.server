@@ -5,11 +5,8 @@ dotenv.config();
 
 const authenticateToken = (req, res, next) => {
   try {
-    const authHeader = req.headers["authorization"];
-    const token = req.cookies.token;
-    const tokenHeader = authHeader && authHeader.split(" ")[1];
-
-    if (token == null) {
+    const token = req.cookies["shopify-bliss"]; // Perbaikan di sini
+    if (!token) {
       return res.status(401).json({
         success: false,
         message: "Token required",
