@@ -188,6 +188,7 @@ router.post("/auth/login", async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None",
+      maxAge: 7200000,
     });
 
     // Mengirim token dalam response
