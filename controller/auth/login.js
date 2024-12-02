@@ -188,9 +188,9 @@ router.post("/auth/login", async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      maxAge: 7200000,
+      maxAge: 86400000,
+      path: "/", // Cookie tersedia di semua path
     });
-
     // Mengirim token dalam response
     res.json({
       message: "Login successfully.",
