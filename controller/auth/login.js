@@ -187,6 +187,7 @@ router.post("/auth/login", async (req, res) => {
     res.cookie("shopify-bliss", token, {
       httpOnly: true,
       secure: true,
+      sameSite: "None",
     });
 
     // Mengirim token dalam response
