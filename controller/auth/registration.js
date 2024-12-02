@@ -62,7 +62,7 @@ router.post("/auth/registration", async (req, res) => {
         username: username,
         email: email,
         password: hashedPassword,
-        role: role,
+        role: "customer",
         created_at: created_at,
         updated_at: created_at,
         is_verified: false,
