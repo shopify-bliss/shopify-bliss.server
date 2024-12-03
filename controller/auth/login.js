@@ -188,7 +188,6 @@ router.post("/auth/login", async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      domain: "https://shopify-bliss.vercel.app",
       maxAge: 86400000,
       path: "/", // Cookie tersedia di semua path
     });
@@ -204,6 +203,7 @@ router.post("/auth/login", async (req, res) => {
       token,
     });
   } catch (error) {
+    console.error("Error during login:", error);
     res.status(500).json({ message: "An error occurred during login", error });
   }
 });
