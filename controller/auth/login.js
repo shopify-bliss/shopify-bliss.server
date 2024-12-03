@@ -185,9 +185,9 @@ router.post("/auth/login", async (req, res) => {
     );
 
     res.cookie("shopify-bliss", token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: true,
-      sameSite: "None",
+      sameSite: "strict",
       maxAge: 86400000,
       path: "/", // Cookie tersedia di semua path
     });
