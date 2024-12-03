@@ -106,21 +106,18 @@ router.get("/auth/google/callback", async (req, res) => {
       }
     );
 
-    res.cookie("shopify-bliss", token, {
-      httpOnly: true,
-      secure: true,
-    });
+    // res.json({
+    //   message: "Login successfully.",
+    //   data: {
+    //     user_id: user.user_id,
+    //     username: user.username,
+    //     email: user.email,
+    //     role: user.role,
+    //   },
+    //   token,
+    // });
 
-    res.json({
-      message: "Login successfully.",
-      data: {
-        user_id: user.user_id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
-      token,
-    });
+    return res.redirect(`https://shopify-bliss.vercel.app/?user_id=${user.user_id}+username=${user.username}+shopify-bliss=${token}`);
   } catch (error) {
     console.error("Error during Google OAuth:", error?.response?.data || error.message);
     return res.status(500).json({
@@ -184,13 +181,6 @@ router.post("/auth/login", async (req, res) => {
       }
     );
 
-    res.cookie("shopify-bliss", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 86400000,
-      path: "/", // Cookie tersedia di semua path
-    });
     // Mengirim token dalam response
     res.json({
       message: "Login successfully.",
