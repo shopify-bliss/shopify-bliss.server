@@ -48,6 +48,8 @@ router.get("/auth/google/callback", async (req, res) => {
     // Menentukan username, menggunakan name jika username tidak ada
     const username = data.name || data.email;
 
+    const passwordDefault = `${birthday.year}${String(birthday.month).padStart(2, '0')}${String(birthday.day).padStart(2, '0')}`;
+
     // Cek apakah user sudah ada di Supabase
     const { data: existingUser, error } = await supabase.from("users").select("*").eq("email", data.email).single(); // Mengambil satu data jika ada
 
@@ -63,6 +65,7 @@ router.get("/auth/google/callback", async (req, res) => {
     let user;
 
     if (!existingUser) {
+      const hashedPassword = await bcrypt.hash(passwordDefault, 10);
       // Jika user belum ada, buat user baru
       const { data: newUser, error: insertError } = await supabase
         .from("users")
@@ -70,7 +73,7 @@ router.get("/auth/google/callback", async (req, res) => {
           {
             email: data.email,
             username: username,
-            password: null,
+            password: hashedPassword,
             created_at: created_at,
             updated_at: created_at,
             is_verified: true,
