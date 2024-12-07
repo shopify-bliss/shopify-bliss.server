@@ -8,6 +8,8 @@ import login from "./controller/auth/login.js";
 import typeTemplate from "./controller/type/type_templates.js";
 import font from "./controller/font/font.js";
 import section from "./controller/section/section.js";
+import navbarFeature from "./controller/navbar_feature/navbar_feature.js";
+import navbarLayout from "./controller/navbar_layout/navbar_layout.js";
 
 import configureMiddleware from "./config/middleware.js";
 
@@ -26,6 +28,8 @@ app.use(login);
 app.use(typeTemplate);
 app.use(font);
 app.use(section);
+app.use(navbarFeature);
+app.use(navbarLayout);
 
 app.listen(port, () => {
   console.log(`running server on port ${port}`);

@@ -6,10 +6,10 @@ dotenv.config();
 const authenticateToken = (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
-    const token = req.cookies.token;
+    // const token = req.cookies.token;
     const tokenHeader = authHeader && authHeader.split(" ")[1];
 
-    if (token == null) {
+    if (tokenHeader == null) {
       return res.status(401).json({
         success: false,
         message: "Token required",

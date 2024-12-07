@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import { google } from "googleapis";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import moment from "moment";
+
 import supabase from "./../../config/supabase.js";
 import { oauth2Client, authorizationUrl } from "./../../helper/googleApis.js";
-
 import configureMiddleware from "./../../config/middleware.js";
 
 dotenv.config();
@@ -22,6 +23,8 @@ router.get("/auth/google", async (req, res) => {
 // Callback Google setelah login berhasil
 router.get("/auth/google/callback", async (req, res) => {
   const { code } = req.query;
+
+  const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
 
   try {
     // Mendapatkan token dari Google
@@ -46,11 +49,20 @@ router.get("/auth/google/callback", async (req, res) => {
     const username = data.name || data.email;
 
     // Cek apakah user sudah ada di Supabase
-    const { data: existingUser, error } = await supabase.from("users").select("*").eq("email", data.email).single();
+    const { data: existingUser, error } = await supabase.from("users").select("*").eq("email", data.email).single(); // Mengambil satu data jika ada
+
+    if (error && error.code !== "PGRST116") {
+      // Jika error bukan karena data tidak ditemukan
+      console.error("Error checking user existence:", error.message);
+      return res.status(500).json({
+        message: "An error occurred while checking the user.",
+        error: error.message,
+      });
+    }
 
     let user;
 
-    if (error || !existingUser) {
+    if (!existingUser) {
       // Jika user belum ada, buat user baru
       const { data: newUser, error: insertError } = await supabase
         .from("users")
@@ -58,7 +70,11 @@ router.get("/auth/google/callback", async (req, res) => {
           {
             email: data.email,
             username: username,
-            password: null, // Karena login menggunakan Google, password tidak diperlukan
+            password: null,
+            created_at: created_at,
+            updated_at: created_at,
+            is_verified: true,
+            role: "customer",
           },
         ])
         .select("*")
@@ -73,14 +89,8 @@ router.get("/auth/google/callback", async (req, res) => {
 
       user = newUser;
     } else {
+      // Jika user sudah ada, gunakan data user yang ada
       user = existingUser;
-    }
-
-    // Cek apakah `user` memiliki `user_id`
-    if (!user || !user.user_id) {
-      return res.status(500).json({
-        message: "User created but missing user_id.",
-      });
     }
 
     // Membuat token JWT
@@ -96,17 +106,11 @@ router.get("/auth/google/callback", async (req, res) => {
       }
     );
 
-    // Mengirim token dalam response
-    return res.json({
-      data: {
-        user: {
-          user_id: user.user_id,
-          username: user.username,
-          email: user.email,
-        },
-        token,
-      },
-    });
+    if (user.role === "admin") {
+      return res.redirect(`https://shopify-bliss.vercel.app/dashboard?shopify-bliss=${token}`);
+    } else if (user.role === "customer") {
+      return res.redirect(`https://shopify-bliss.vercel.app/profile?shopify-bliss=${token}`);
+    }
   } catch (error) {
     console.error("Error during Google OAuth:", error?.response?.data || error.message);
     return res.status(500).json({
@@ -170,23 +174,13 @@ router.post("/auth/login", async (req, res) => {
       }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-    });
-
     // Mengirim token dalam response
     res.json({
       message: "Login successfully.",
-      data: {
-        user_id: user.user_id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
       token,
     });
   } catch (error) {
+    console.error("Error during login:", error);
     res.status(500).json({ message: "An error occurred during login", error });
   }
 });

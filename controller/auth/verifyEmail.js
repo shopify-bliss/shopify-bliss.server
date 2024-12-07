@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import supabase from "./../../config/supabase.js";
 import configureMiddleware from "./../../config/middleware.js";
 
-
 const app = express();
 configureMiddleware(app);
 const router = express.Router();
@@ -17,21 +16,31 @@ router.get("/verify-email", async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { userId, email } = decoded;
+    const { email } = decoded;
 
     const { data, error } = await supabase
       .from("users")
-      .update({ is_verified: true }) // Field "verified" harus ada pada tabel "users"
-      .match({ user_id: userId, email });
+      .update({ is_verified: true })
+      .match({ email });
 
-    // if (error || data.length === 0) {
-    //   return res.status(400).json({ message: "Invalid or expired token" });
-    // }
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to verify email",
+        error,
+      });
+    }
 
-    res.status(200).json({ message: "Email verified successfully" });
+    // Redirect ke halaman login
+    return res.redirect(
+      `https://shopify-bliss.vercel.app/login?message=Email%20verified%20successfully.`
+    );
   } catch (error) {
-    res.status(400).json({ message: "Invalid or expired token" });
+    return res.redirect(
+      `https://shopify-bliss.github.io/login?message=Invalid or expired token`
+    );
   }
 });
+
 
 export default router;
