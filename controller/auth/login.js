@@ -99,6 +99,7 @@ router.get("/auth/google/callback", async (req, res) => {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
+        role: user.role,
       },
       process.env.JWT_SECRET,
       {
@@ -106,11 +107,7 @@ router.get("/auth/google/callback", async (req, res) => {
       }
     );
 
-    if (user.role === "admin") {
-      return res.redirect(`https://shopify-bliss.vercel.app/dashboard?shopify-bliss=${token}`);
-    } else if (user.role === "customer") {
-      return res.redirect(`https://shopify-bliss.vercel.app/profile?shopify-bliss=${token}`);
-    }
+    return res.redirect(`https://shopify-bliss.vercel.app/login?shopify-bliss=${token}&role=${user.role}`);
   } catch (error) {
     console.error("Error during Google OAuth:", error?.response?.data || error.message);
     return res.status(500).json({
@@ -177,6 +174,9 @@ router.post("/auth/login", async (req, res) => {
     // Mengirim token dalam response
     res.json({
       message: "Login successfully.",
+      data: {
+        role: user.role
+      },
       token,
     });
   } catch (error) {
