@@ -79,7 +79,7 @@ router.post("/auth/registration", async (req, res) => {
     });
 
     // Kirim email verifikasi
-    await sendVerificationEmail(email, verificationToken);
+    await sendVerificationEmail(email);
 
     res.status(200).json({
       success: true,
