@@ -10,8 +10,10 @@ import font from "./controller/font/font.js";
 import section from "./controller/section/section.js";
 import navbarFeature from "./controller/navbar_feature/navbar_feature.js";
 import navbarLayout from "./controller/navbar_layout/navbar_layout.js";
+import menu from "./controller/menu/menu.js";
 
 import configureMiddleware from "./config/middleware.js";
+import "./helper/cronJob.js"
 
 dotenv.config();
 
@@ -30,6 +32,7 @@ app.use(font);
 app.use(section);
 app.use(navbarFeature);
 app.use(navbarLayout);
+app.use(menu);
 
 app.listen(port, () => {
   console.log(`running server on port ${port}`);

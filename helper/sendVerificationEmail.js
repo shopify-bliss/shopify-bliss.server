@@ -43,7 +43,7 @@ export const sendVerificationEmail = async (email) => {
           <h2>Welcome! Please verify your email address</h2>
           <!-- Logo Image -->
           <div style="text-align: center;">
-            <img src="https://github.com/shopify-bliss/Image/blob/main/shopify.png?raw=true" alt="Logo" style="max-width: 150px;">
+            <img src="https://raw.githubusercontent.com/shopify-bliss/shopify-bliss.github.io/refs/heads/main/src/assets/logo/black-logo.png" alt="Logo" style="max-width: 150px;">
           </div>
           
           <p>Thank you for registering. To complete your registration, please verify your email address with the following OTP code:</p>
@@ -53,7 +53,7 @@ export const sendVerificationEmail = async (email) => {
             <strong style="font-size: 24px;">${verificationCode}</strong>
           </div>
           
-          <p>If you did not register, please ignore this email.</p>
+          <p>The code will expired in 10 minutes</p>
         </body>
       </html>
     `,

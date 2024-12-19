@@ -1,6 +1,5 @@
 import express from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import moment from "moment";
 
 import supabase from "./../../config/supabase.js";
@@ -16,6 +15,7 @@ router.post("/auth/registration", async (req, res) => {
     const { username, email, password, role } = req.body;
 
     const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
+    const expires_at = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
 
     if (password.length < 8) {
       return res.status(400).json({
@@ -26,12 +26,11 @@ router.post("/auth/registration", async (req, res) => {
     // Query untuk memeriksa apakah email sudah ada
     const { data: emailExists, error: emailError } = await supabase
       .from("users")
-      .select("email") // Pilih kolom spesifik untuk efisiensi
+      .select("email")
       .eq("email", email)
       .single();
 
     if (emailExists) {
-      // Jika email sudah ada
       return res.status(400).json({
         success: false,
         message: "Email already exists.",
@@ -41,42 +40,36 @@ router.post("/auth/registration", async (req, res) => {
     // Query untuk memeriksa apakah username sudah ada
     const { data: usernameExists, error: usernameError } = await supabase
       .from("users")
-      .select("username") // Pilih kolom spesifik untuk efisiensi
+      .select("username")
       .eq("username", username)
       .single();
 
     if (usernameExists) {
-      // Jika username sudah ada
       return res.status(400).json({
         success: false,
         message: "Username already exists.",
       });
     }
 
-    // Jika email dan username belum ada, lanjutkan proses pendaftaran
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Simpan pengguna baru ke database
     const { data, error } = await supabase.from("users").insert([
       {
-        username: username,
-        email: email,
+        username,
+        email,
         password: hashedPassword,
         role: "customer",
-        created_at: created_at,
+        created_at,
         updated_at: created_at,
         is_verified: false,
+        expires_at, // Waktu kadaluarsa
       },
     ]);
 
     if (error) {
       return res.status(400).json({ message: error.message });
     }
-
-    // Buat token verifikasi
-    const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
 
     // Kirim email verifikasi
     await sendVerificationEmail(email);
