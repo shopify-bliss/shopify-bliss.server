@@ -11,6 +11,7 @@ import section from "./controller/section/section.js";
 import navbarFeature from "./controller/navbar_feature/navbar_feature.js";
 import navbarLayout from "./controller/navbar_layout/navbar_layout.js";
 import menu from "./controller/menu/menu.js";
+import subMenu from "./controller/menu/sub_menu.js";
 
 import configureMiddleware from "./config/middleware.js";
 import "./helper/cronJob.js"
@@ -33,6 +34,7 @@ app.use(section);
 app.use(navbarFeature);
 app.use(navbarLayout);
 app.use(menu);
+app.use(subMenu);
 
 app.listen(port, () => {
   console.log(`running server on port ${port}`);
