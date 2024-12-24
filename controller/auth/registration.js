@@ -54,7 +54,7 @@ router.post("/auth/registration", async (req, res) => {
     }
 
     const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
-    const expires_at = moment().add(1, "minutes").format("YYYY-MM-DD HH:mm:ss");
+    const expires_at = moment().add(10, "minutes").format("YYYY-MM-DD HH:mm:ss");
 
     // Query untuk memeriksa apakah email sudah ada
     const { data: emailExists, error: emailError } = await supabase.from("users").select("email").eq("email", email).single();
