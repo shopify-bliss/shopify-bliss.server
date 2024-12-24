@@ -102,8 +102,7 @@ router.post("/auth/registration", async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Registration successful. Please check your email to verify your account.",
-      da
+      message: "Registration successful. Please check your email to verify your account."
     });
   } catch (error) {
     console.log("Error:", error);
