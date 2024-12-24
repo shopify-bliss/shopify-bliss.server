@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/api/access-management", authenticateToken, async (req, res) => {
   try {
-    const { role, accessMenu } = req.body;
+    const { menuID, role, accessMenu } = req.body;
 
     if (req.user.role !== "admin") {
       return res.status(403).json({
@@ -20,11 +20,23 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
+    // Validasi apakah menu dengan menuID ada
+    const { data: menuExists, error: menuError } = await supabase.from("menus").select("menu_id").eq("menu_id", menuID).single();
+
+    if (menuError) {
+      console.error("Menu query error:", menuError);
+      return res.status(400).json({
+        success: false,
+        message: "Menu not Found.",
+      });
+    }
+
     const { data: access, error: insertError } = await supabase
       .from("access_management")
       .insert({
         role: role,
         access_menu: accessMenu,
+        menu_id: menuID,
       })
       .select("*");
 
@@ -52,7 +64,7 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
 
 router.get("/api/access-management", authenticateToken, async (req, res) => {
   try {
-    const { data: access, error: fetchError } = await supabase.from("access_management").select("*");
+    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*)`);
 
     if (fetchError) {
       console.error("Fetch error:", fetchError);
@@ -86,7 +98,7 @@ router.get("/api/access-management-id", authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: access, error: fetchError } = await supabase.from("access_management").select("*").eq("access_id", id);
+    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*)`).eq("access_id", id);
 
     if (fetchError) {
       console.error("Fetch error:", fetchError);
@@ -120,7 +132,7 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
-    const { role, accessMenu } = req.body;
+    const { role, accessMenu, menuID } = req.body;
 
     if (req.user.role !== "admin") {
       return res.status(403).json({
@@ -129,11 +141,23 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
+    // Validasi apakah menu dengan menuID ada
+    const { data: menuExists, error: menuError } = await supabase.from("menus").select("menu_id").eq("menu_id", menuID).single();
+
+    if (menuError) {
+      console.error("Menu query error:", menuError);
+      return res.status(400).json({
+        success: false,
+        message: "Menu not Found.",
+      });
+    }
+
     const { data: access, error: updateError } = await supabase
       .from("access_management")
       .update({
         role: role,
         access_menu: accessMenu,
+        menu_id: menuID,
       })
       .eq("access_id", id)
       .select("*");
