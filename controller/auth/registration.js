@@ -1,6 +1,6 @@
 import express from "express";
 import bcrypt from "bcryptjs";
-import moment from "moment";
+import moment from "moment-timezone";
 
 import supabase from "./../../config/supabase.js";
 import { sendVerificationEmail } from "./../../helper/sendVerificationEmail.js";
@@ -53,8 +53,11 @@ router.post("/auth/registration", async (req, res) => {
       console.log("Password is valid");
     }
 
-    const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
-    const expires_at = moment().add(10, "minutes").format("YYYY-MM-DD HH:mm:ss");
+    const created_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
+    const expires_at = moment().tz("Asia/Jakarta").add(10, "minutes").format("YYYY-MM-DD HH:mm:ss");
+
+    console.log("Created at:", created_at);
+    console.log("Expires at:", expires_at);
 
     // Query untuk memeriksa apakah email sudah ada
     const { data: emailExists, error: emailError } = await supabase.from("users").select("email").eq("email", email).single();
@@ -102,7 +105,7 @@ router.post("/auth/registration", async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Registration successful. Please check your email to verify your account."
+      message: "Registration successful. Please check your email to verify your account.",
     });
   } catch (error) {
     console.log("Error:", error);
