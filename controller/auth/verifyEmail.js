@@ -1,7 +1,10 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import moment from "moment";
+
 import supabase from "./../../config/supabase.js";
 import configureMiddleware from "./../../config/middleware.js";
+import authenticateToken from "../../helper/token.js";
 
 const app = express();
 configureMiddleware(app);
@@ -62,5 +65,43 @@ router.post("/auth/verify-email", async (req, res) => {
     res.status(500).json({ message: "An error occurred while verifying email.", error });
   }
 });
+
+router.post("/api/otp-password", authenticateToken, async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const userID = req.user.user_id;
+
+    if (!otp) {
+      return res.status(400).json({ message: "OTP is required" });
+    }
+
+    // Cek kecocokan OTP
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("verification_code")
+      .eq("user_id", userID)
+      .single();
+
+    if (userError || !user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (otp !== user.verification_code) {
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    // Tandai bahwa OTP diverifikasi
+    await supabase.from("users").update({ verification_code: null }).eq("user_id", userID);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified successfully. You can now update your password.",
+    });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 export default router;
