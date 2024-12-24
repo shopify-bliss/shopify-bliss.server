@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendVerificationEmail = async (email) => {
+export const sendVerificationPassword = async (email) => {
   try {
     // Validasi input
     if (!email) {
@@ -36,24 +36,24 @@ export const sendVerificationEmail = async (email) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Verify Your Email",
+      subject: "Update Your Password",
       html: `
       <html>
         <body>
-          <h2>Welcome! Please verify your email address</h2>
+          <h2>Welcome! Please input this OTP to update your password</h2>
           <!-- Logo Image -->
           <div style="text-align: center;">
             <img src="https://raw.githubusercontent.com/shopify-bliss/shopify-bliss.github.io/refs/heads/main/src/assets/logo/black-logo.png" alt="Logo" style="max-width: 150px;">
           </div>
           
-          <p>Thank you for registering. To complete your registration, please verify your email address with the following OTP code:</p>
+          <p>To complete update password, please verify your account with the following OTP code:</p>
             
           <!-- OTP Code -->
           <div style="text-align: center; margin-top: 20px;">
             <strong style="font-size: 24px;">${verificationCode}</strong>
           </div>
           
-          <p>The code will expired in 10 minutes</p>
+          <p>The code will expired in 5 minutes</p>
         </body>
       </html>
     `,
@@ -78,4 +78,4 @@ export const sendVerificationEmail = async (email) => {
   }
 };
 
-export default sendVerificationEmail;
+export default sendVerificationPassword;

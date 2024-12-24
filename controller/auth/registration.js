@@ -1,7 +1,6 @@
 import express from "express";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import moment from "moment";
+import moment from "moment-timezone";
 
 import supabase from "./../../config/supabase.js";
 import { sendVerificationEmail } from "./../../helper/sendVerificationEmail.js";
@@ -13,25 +12,57 @@ const router = express.Router();
 
 router.post("/auth/registration", async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password, phoneNumber } = req.body;
 
-    const created_at = moment().format("YYYY-MM-DD HH:mm:ss");
-
-    if (password.length < 8) {
+    if (!username || !email || !password || !phoneNumber) {
       return res.status(400).json({
-        message: "Password must be at least 8 characters long.",
+        message: "All fields are required.",
       });
     }
 
+    // Validasi password sesuai kriteria
+    const passwordCriteria = {
+      minLength: /.{8,}/,
+      lowercase: /[a-z]/,
+      uppercase: /[A-Z]/,
+      number: /\d/,
+      specialCharacter: /[!@#$%^&*(),.?":{}|<>]/,
+    };
+
+    if (!passwordCriteria.minLength.test(password)) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long.",
+      });
+    } else if (!passwordCriteria.lowercase.test(password)) {
+      return res.status(400).json({
+        message: "Password must be contain at least one lowercase letter",
+      });
+    } else if (!passwordCriteria.uppercase.test(password)) {
+      return res.status(400).json({
+        message: "Password must be contain at least one uppercase letter",
+      });
+    } else if (!passwordCriteria.number.test(password)) {
+      return res.status(400).json({
+        message: "Password must be contain at least one number",
+      });
+    } else if (!passwordCriteria.specialCharacter.test(password)) {
+      return res.status(400).json({
+        message: "Password must be contain at least one special character",
+      });
+    } else {
+      console.log("Password is valid");
+    }
+
+    const created_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
+    const expires_at = moment().tz("Asia/Jakarta").add(10, "minutes").format("YYYY-MM-DD HH:mm:ss");
+
+    console.log("Created at:", created_at);
+    console.log("Expires at:", expires_at);
+
     // Query untuk memeriksa apakah email sudah ada
-    const { data: emailExists, error: emailError } = await supabase
-      .from("users")
-      .select("email") // Pilih kolom spesifik untuk efisiensi
-      .eq("email", email)
-      .single();
+    const { data: emailExists, error: emailError } = await supabase.from("users").select("email").eq("email", email).single();
 
     if (emailExists) {
-      // Jika email sudah ada
       return res.status(400).json({
         success: false,
         message: "Email already exists.",
@@ -39,33 +70,29 @@ router.post("/auth/registration", async (req, res) => {
     }
 
     // Query untuk memeriksa apakah username sudah ada
-    const { data: usernameExists, error: usernameError } = await supabase
-      .from("users")
-      .select("username") // Pilih kolom spesifik untuk efisiensi
-      .eq("username", username)
-      .single();
+    const { data: usernameExists, error: usernameError } = await supabase.from("users").select("username").eq("username", username).single();
 
     if (usernameExists) {
-      // Jika username sudah ada
       return res.status(400).json({
         success: false,
         message: "Username already exists.",
       });
     }
 
-    // Jika email dan username belum ada, lanjutkan proses pendaftaran
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Simpan pengguna baru ke database
     const { data, error } = await supabase.from("users").insert([
       {
-        username: username,
-        email: email,
+        username,
+        email,
         password: hashedPassword,
         role: "customer",
-        created_at: created_at,
+        created_at,
         updated_at: created_at,
         is_verified: false,
+        expires_at,
+        phone_number: phoneNumber,
       },
     ]);
 
@@ -73,13 +100,8 @@ router.post("/auth/registration", async (req, res) => {
       return res.status(400).json({ message: error.message });
     }
 
-    // Buat token verifikasi
-    const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
     // Kirim email verifikasi
-    await sendVerificationEmail(email, verificationToken);
+    await sendVerificationEmail(email);
 
     res.status(200).json({
       success: true,
