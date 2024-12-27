@@ -23,11 +23,20 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
     // Validasi apakah menu dengan menuID ada
     const { data: menuExists, error: menuError } = await supabase.from("menus").select("menu_id").eq("menu_id", menuID).single();
 
-    if (menuError) {
+    if (menuError || !menuExists) {
       console.error("Menu query error:", menuError);
       return res.status(400).json({
         success: false,
         message: "Menu not Found.",
+      });
+    }
+
+    const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role", role).single();
+
+    if (accessError === null && existingAccess) {
+      return res.status(400).json({
+        success: false,
+        message: "Access for this menu and role already exists.",
       });
     }
 
@@ -148,6 +157,15 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Menu not Found.",
+      });
+    }
+
+    const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role", role).single();
+
+    if (accessError === null && existingAccess) {
+      return res.status(400).json({
+        success: false,
+        message: "Access for this menu and role already exists.",
       });
     }
 

@@ -32,12 +32,25 @@ router.post("/api/sub-menu", authenticateToken, async (req, res) => {
     // Validasi apakah menu dengan menuID ada
     const { data: menuExists, error: menuError } = await supabase.from("menus").select("menu_id").eq("menu_id", menuID).single();
 
-    if (menuError) {
+    if (menuError || !menuExists) {
       console.error("Menu query error:", menuError);
       return res.status(400).json({
         success: false,
         message: "Menu not Found.",
       });
+    }
+
+    // Jika defaults bernilai true, set semua default pada menuID ini menjadi false
+    if (defaults) {
+      const { error: updateError } = await supabase.from("sub_menus").update({ default: false }).eq("menu_id", menuID);
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to update existing sub-menu defaults.",
+        });
+      }
     }
 
     // Insert data ke tabel sub_menus
@@ -155,6 +168,18 @@ router.put("/api/sub-menu", authenticateToken, async (req, res) => {
       });
     }
 
+    if (defaults) {
+      const { error: updateDefaultsError } = await supabase.from("sub_menus").update({ default: false }).eq("menu_id", menuID);
+
+      if (updateDefaultsError) {
+        console.error("Update defaults error:", updateDefaultsError);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to update other sub-menu defaults.",
+        });
+      }
+    }
+
     // Perbarui data sub-menu
     const { data: subMenu, error: updateError } = await supabase
       .from("sub_menus")
@@ -200,8 +225,27 @@ router.delete("/api/sub-menu", authenticateToken, async (req, res) => {
       });
     }
 
+    // Ambil submenu yang akan dihapus untuk mendapatkan menu_id dan default status
+    const { data: subMenuToDelete, error: fetchError } = await supabase
+      .from("sub_menus")
+      .select("menu_id, default")
+      .eq("sub_menu_id", id)
+      .single();
+
+    if (fetchError || !subMenuToDelete) {
+      console.error("Fetch error:", fetchError);
+      return res.status(404).json({
+        success: false,
+        message: "Sub-menu not found.",
+      });
+    }
+
     // Hapus data sub-menu
-    const { data: subMenu, error: deleteError } = await supabase.from("sub_menus").delete().eq("sub_menu_id", id).select("*");
+    const { data: deletedSubMenu, error: deleteError } = await supabase
+      .from("sub_menus")
+      .delete()
+      .eq("sub_menu_id", id)
+      .select("*");
 
     if (deleteError) {
       console.error("Delete error:", deleteError);
@@ -211,10 +255,28 @@ router.delete("/api/sub-menu", authenticateToken, async (req, res) => {
       });
     }
 
+    // Jika submenu yang dihapus adalah default, set salah satu submenu lainnya menjadi true
+    if (subMenuToDelete.default) {
+      const { data: updatedSubMenu, error: updateError } = await supabase
+        .from("sub_menus")
+        .update({ default: true })
+        .eq("menu_id", subMenuToDelete.menu_id)
+        .order("sub_menu_id", { ascending: true }) // Tambahkan pengurutan eksplisit
+        .limit(1);
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to update another sub-menu to default.",
+        });
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: "Sub-menu has been deleted successfully.",
-      data: subMenu,
+      data: deletedSubMenu,
     });
   } catch (error) {
     console.error("Error:", error);
