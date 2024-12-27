@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/api/access-management", authenticateToken, async (req, res) => {
   try {
-    const { menuID, role, accessMenu } = req.body;
+    const { menuID, role } = req.body;
 
     if (req.user.role !== "admin") {
       return res.status(403).json({
@@ -35,7 +35,6 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
       .from("access_management")
       .insert({
         role: role,
-        access_menu: accessMenu,
         menu_id: menuID,
       })
       .select("*");
@@ -132,7 +131,7 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
-    const { role, accessMenu, menuID } = req.body;
+    const { role, menuID } = req.body;
 
     if (req.user.role !== "admin") {
       return res.status(403).json({
@@ -156,7 +155,6 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       .from("access_management")
       .update({
         role: role,
-        access_menu: accessMenu,
         menu_id: menuID,
       })
       .eq("access_id", id)
