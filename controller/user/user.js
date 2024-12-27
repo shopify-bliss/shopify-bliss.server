@@ -8,7 +8,6 @@ import configureMiddleware from "./../../config/middleware.js";
 import authenticateToken from "../../helper/token.js";
 import { sendVerificationPassword } from "./../../helper/sendVerificationPassword.js";
 
-
 dotenv.config();
 
 const app = express();
@@ -127,6 +126,25 @@ router.put("/api/update-password", authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating password:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/api/all-user", authenticateToken, async (req, res) => {
+  try {
+    const { data: users, error } = await supabase.from("users").select("*");
+
+    if (error) {
+      console.error("Error:", error);
+      return res.status(500).json({ message: error.message });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    console.error("Error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
