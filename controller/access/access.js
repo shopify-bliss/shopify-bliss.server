@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/api/access-management", authenticateToken, async (req, res) => {
   try {
-    const { menuID, role } = req.body;
+    const { menuID, roleID } = req.body;
 
     if (req.user.role !== "admin") {
       return res.status(403).json({
@@ -31,6 +31,17 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
+    // Validasi apakah role dengan roleID ada
+    const { data: roleExists, error: roleError } = await supabase.from("roles").select("role_id").eq("role_id", roleID).single();
+
+    if (roleError || !roleExists) {
+      console.error("Role query error:", roleError);
+      return res.status(400).json({
+        success: false,
+        message: "Role not Found.",
+      });
+    }
+
     const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role", role).single();
 
     if (accessError === null && existingAccess) {
@@ -43,7 +54,7 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
     const { data: access, error: insertError } = await supabase
       .from("access_management")
       .insert({
-        role: role,
+        role_id: roleID,
         menu_id: menuID,
       })
       .select("*");
@@ -72,7 +83,7 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
 
 router.get("/api/access-management", authenticateToken, async (req, res) => {
   try {
-    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*)`);
+    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*),roles(*)`);
 
     if (fetchError) {
       console.error("Fetch error:", fetchError);
@@ -106,7 +117,7 @@ router.get("/api/access-management-id", authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*)`).eq("access_id", id);
+    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*),roles(*)`).eq("access_id", id);
 
     if (fetchError) {
       console.error("Fetch error:", fetchError);
@@ -140,7 +151,7 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
-    const { role, menuID } = req.body;
+    const { roleID, menuID } = req.body;
 
     if (req.user.role !== "admin") {
       return res.status(403).json({
@@ -160,6 +171,17 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
+    // Validasi apakah role_id dengan menuID ada
+    const { data: roleExists, error: roleError } = await supabase.from("roles").select("role_id").eq("role_id", roleID).single();
+
+    if (roleError || !roleExists) {
+      console.error("Role query error:", roleError);
+      return res.status(400).json({
+        success: false,
+        message: "Role not Found.",
+      });
+    }
+
     const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role", role).single();
 
     if (accessError === null && existingAccess) {
@@ -172,7 +194,7 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
     const { data: access, error: updateError } = await supabase
       .from("access_management")
       .update({
-        role: role,
+        role_id: roleID,
         menu_id: menuID,
       })
       .eq("access_id", id)
