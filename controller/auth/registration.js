@@ -103,6 +103,7 @@ router.post("/auth/registration", async (req, res) => {
         is_verified: false,
         expires_at,
         phone_number: phoneNumber,
+        avatar: "polar-bear.png",
       },
     ]);
 
