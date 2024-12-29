@@ -15,6 +15,7 @@ import subMenu from "./controller/menu/sub_menu.js";
 import user from "./controller/user/user.js";
 import access from "./controller/access/access.js";
 import role from "./controller/auth/role.js";
+import superAdmin from "./controller/super_admin/super_admin.js";
 
 import configureMiddleware from "./config/middleware.js";
 import "./helper/cronJob.js"
@@ -41,6 +42,7 @@ app.use(subMenu);
 app.use(user);
 app.use(access);
 app.use(role);
+app.use(superAdmin);
 
 app.listen(port, () => {
   console.log(`running server on port ${port}`);
