@@ -86,7 +86,7 @@ router.post("/api/otp-password", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (otp !== user.verification_code) {
+    if (otp !== userx) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 

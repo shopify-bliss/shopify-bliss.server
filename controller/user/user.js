@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
-import moment from "moment";
+import moment from "moment-timezone";
 
 import supabase from "./../../config/supabase.js";
 import configureMiddleware from "./../../config/middleware.js";
@@ -16,14 +16,14 @@ const router = express.Router();
 
 router.put("/api/user", authenticateToken, async (req, res) => {
   try {
-    const { username, email, phoneNumber } = req.body;
+    const { username, phoneNumber } = req.body;
     const userID = req.user.user_id;
-    const updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
+    const updated_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
 
     console.log("User ID:", userID);
 
     // Validasi input
-    if (!username && !email && !phoneNumber) {
+    if (!username && !phoneNumber) {
       return res.status(400).json({ message: "At least one field must be provided for update." });
     }
 
@@ -31,7 +31,6 @@ router.put("/api/user", authenticateToken, async (req, res) => {
       .from("users")
       .update({
         username: username,
-        email: email,
         phone_number: phoneNumber,
         updated_at: updated_at,
       })
@@ -84,40 +83,85 @@ router.post("/api/send-otp", authenticateToken, async (req, res) => {
 
 router.put("/api/update-password", authenticateToken, async (req, res) => {
   try {
-    const { password } = req.body;
+    const { oldPassword, newPassword } = req.body;
     const userID = req.user.user_id;
 
     // Validasi input
-    if (!password) {
-      return res.status(400).json({ message: "Password is required." });
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Old password and new password are required." });
     }
 
-    // Periksa apakah OTP sudah diverifikasi
-    const { data: user, error: userError } = await supabase.from("users").select("verification_code").eq("user_id", userID).single();
+    // Ambil data pengguna dari database
+    const { data: user, error: userError } = await supabase.from("users").select("password, verification_code").eq("user_id", userID).single();
 
-    if (userError || !user || user.verification_code !== null) {
+    if (userError || !user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    // Pastikan OTP sudah diverifikasi
+    if (user.verification_code !== null) {
       return res.status(400).json({
         message: "You must verify your OTP before updating your password.",
       });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Verifikasi password lama
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+      return res.status(400).json({
+        message: "Old password is incorrect.",
+      });
+    }
+
+    // Validasi password
+    const passwordCriteria = {
+      minLength: /.{8,}/,
+      lowercase: /[a-z]/,
+      uppercase: /[A-Z]/,
+      number: /\d/,
+      specialCharacter: /[!@#$%^&*(),.?":{}|<>]/,
+    };
+
+    if (!passwordCriteria.minLength.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long.",
+      });
+    } else if (!passwordCriteria.lowercase.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must contain at least one lowercase letter.",
+      });
+    } else if (!passwordCriteria.uppercase.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must contain at least one uppercase letter.",
+      });
+    } else if (!passwordCriteria.number.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must contain at least one number.",
+      });
+    } else if (!passwordCriteria.specialCharacter.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must contain at least one special character.",
+      });
+    }
+
+    // Hash password baru
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     const updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
 
     // Update password di database
-    const { data: updateUser, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from("users")
       .update({
-        password: hashedPassword,
+        password: hashedNewPassword,
         updated_at: updated_at,
       })
-      .eq("user_id", userID)
-      .single();
+      .eq("user_id", userID);
 
     if (updateError) {
       console.error("Update error:", updateError);
-      return res.status(500).json({ message: updateError.message });
+      return res.status(500).json({ message: "Failed to update password." });
     }
 
     res.status(200).json({
@@ -142,6 +186,27 @@ router.get("/api/all-user", authenticateToken, async (req, res) => {
     res.status(200).json({
       success: true,
       data: users,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/api/user", authenticateToken, async (req, res) => {
+  try {
+    const userID = req.user.user_id;
+
+    const { data: user, error } = await supabase.from("users").select("*").eq("user_id", userID).single();
+
+    if (error) {
+      console.error("Error:", error);
+      return res.status(500).json({ message: error.message });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
     });
   } catch (error) {
     console.error("Error:", error);
