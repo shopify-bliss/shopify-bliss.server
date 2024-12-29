@@ -197,7 +197,7 @@ router.get("/api/user", authenticateToken, async (req, res) => {
   try {
     const userID = req.user.user_id;
 
-    const { data: user, error } = await supabase.from("users").select("*").eq("user_id", userID).single();
+    const { data: user, error } = await supabase.from("users").select(`*, roles(*)`).eq("user_id", userID).single();
 
     if (error) {
       console.error("Error:", error);
