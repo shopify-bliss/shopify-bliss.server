@@ -122,34 +122,40 @@ router.post("/auth/login", async (req, res) => {
   try {
     const { email, username, password } = req.body;
 
-    // Cek apakah password tidak kosong dan salah satu antara email atau username ada
+    // Validasi input
     if (!password || (!email && !username)) {
       return res.status(400).json({
         message: "Password and either email or username are required.",
       });
     }
 
-    const { data: users, error } = await supabase.from("users").select("*").or(`email.eq.${email},username.eq.${username}`).limit(1);
+    // Query untuk mengambil user beserta role berdasarkan email atau username
+    const { data: users, error } = await supabase
+      .from("users")
+      .select(`*, roles(role_name, role_id)`) // Pastikan nama kolom di tabel roles sesuai
+      .or(`email.eq.${email},username.eq.${username}`)
+      .limit(1);
 
     if (error) {
       throw new Error("Failed to fetch user");
     }
 
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
       return res.status(404).json({
         message: "User not found",
       });
     }
 
-    // Cek apakah akun sudah diverifikasi
     const user = users[0];
+
+    // Validasi akun diverifikasi
     if (!user.is_verified) {
       return res.status(403).json({
         message: "Account not verified. Please verify your account.",
       });
     }
 
-    // Cek apakah password benar
+    // Validasi password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(400).json({
@@ -163,7 +169,7 @@ router.post("/auth/login", async (req, res) => {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
-        role: user.role,
+        role: user.roles?.role_name, // Mengambil nama role dari relasi
       },
       process.env.JWT_SECRET,
       {
@@ -171,11 +177,11 @@ router.post("/auth/login", async (req, res) => {
       }
     );
 
-    // Mengirim token dalam response
+    // Mengirim respons sukses
     res.json({
       message: "Login successfully.",
       data: {
-        role: user.role
+        role: user.roles?.role_name, // Mengembalikan nama role
       },
       token,
     });

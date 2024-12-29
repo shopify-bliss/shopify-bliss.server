@@ -14,13 +14,22 @@ router.post("/auth/registration", async (req, res) => {
   try {
     const { username, email, password, phoneNumber } = req.body;
 
+    // Validasi input
     if (!username || !email || !password || !phoneNumber) {
       return res.status(400).json({
         message: "All fields are required.",
       });
     }
 
-    // Validasi password sesuai kriteria
+    // Validasi nomor telepon
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return res.status(400).json({
+        message: "Invalid phone number format. Please provide a valid phone number.",
+      });
+    }
+
+    // Validasi password
     const passwordCriteria = {
       minLength: /.{8,}/,
       lowercase: /[a-z]/,
@@ -35,51 +44,52 @@ router.post("/auth/registration", async (req, res) => {
       });
     } else if (!passwordCriteria.lowercase.test(password)) {
       return res.status(400).json({
-        message: "Password must be contain at least one lowercase letter",
+        message: "Password must contain at least one lowercase letter.",
       });
     } else if (!passwordCriteria.uppercase.test(password)) {
       return res.status(400).json({
-        message: "Password must be contain at least one uppercase letter",
+        message: "Password must contain at least one uppercase letter.",
       });
     } else if (!passwordCriteria.number.test(password)) {
       return res.status(400).json({
-        message: "Password must be contain at least one number",
+        message: "Password must contain at least one number.",
       });
     } else if (!passwordCriteria.specialCharacter.test(password)) {
       return res.status(400).json({
-        message: "Password must be contain at least one special character",
+        message: "Password must contain at least one special character.",
       });
-    } else {
-      console.log("Password is valid");
     }
 
     const created_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
     const expires_at = moment().tz("Asia/Jakarta").add(10, "minutes").format("YYYY-MM-DD HH:mm:ss");
 
-    console.log("Created at:", created_at);
-    console.log("Expires at:", expires_at);
+    // Gabungan validasi email dan username
+    const { data: existingUser, error: userCheckError } = await supabase.from("users").select("email, username").or(`email.eq.${email},username.eq.${username}`).single();
 
-    // Query untuk memeriksa apakah email sudah ada
-    const { data: emailExists, error: emailError } = await supabase.from("users").select("email").eq("email", email).single();
-
-    if (emailExists) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already exists.",
-      });
+    if (existingUser) {
+      if (existingUser.email === email) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already exists.",
+        });
+      }
+      if (existingUser.username === username) {
+        return res.status(400).json({
+          success: false,
+          message: "Username already exists.",
+        });
+      }
     }
 
-    // Query untuk memeriksa apakah username sudah ada
-    const { data: usernameExists, error: usernameError } = await supabase.from("users").select("username").eq("username", username).single();
-
-    if (usernameExists) {
-      return res.status(400).json({
-        success: false,
-        message: "Username already exists.",
-      });
+    if (userCheckError && userCheckError.code !== "PGRST116") {
+      // Handle unexpected error
+      throw new Error(userCheckError.message);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Hardcoded role_id untuk "customer"
+    const defaultRoleId = "cebccb98-7ef0-4184-95b9-7320329f21d3";
 
     // Simpan pengguna baru ke database
     const { data, error } = await supabase.from("users").insert([
@@ -87,7 +97,7 @@ router.post("/auth/registration", async (req, res) => {
         username,
         email,
         password: hashedPassword,
-        role: "customer",
+        role_id: defaultRoleId,
         created_at,
         updated_at: created_at,
         is_verified: false,
@@ -97,7 +107,7 @@ router.post("/auth/registration", async (req, res) => {
     ]);
 
     if (error) {
-      return res.status(400).json({ message: error.message });
+      throw new Error(error.message);
     }
 
     // Kirim email verifikasi
@@ -108,7 +118,7 @@ router.post("/auth/registration", async (req, res) => {
       message: "Registration successful. Please check your email to verify your account.",
     });
   } catch (error) {
-    console.log("Error:", error);
+    console.error("Error during registration:", error);
     res.status(500).json({ message: "An error occurred during registration", error });
   }
 });
