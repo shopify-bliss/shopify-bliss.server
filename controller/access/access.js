@@ -13,6 +13,9 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
   try {
     const { menuID, roleID } = req.body;
 
+    console.log("Menu ID:", menuID, "Role ID:", roleID);
+    
+
     if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
@@ -32,9 +35,9 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
     }
 
     // Validasi apakah role dengan roleID ada
-    const { data: roleExists, error: roleError } = await supabase.from("roles").select("role_id").eq("role_id", roleID).single();
+    const { data: roleExists, error: roleError } = await supabase.from("roles").select("*").eq("role_id", roleID).single();
 
-    if (roleError || !roleExists) {
+    if (roleError) {
       console.error("Role query error:", roleError);
       return res.status(400).json({
         success: false,
@@ -42,7 +45,7 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role", role).single();
+    const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role_id", roleID).single();
 
     if (accessError === null && existingAccess) {
       return res.status(400).json({
