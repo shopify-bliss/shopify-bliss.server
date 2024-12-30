@@ -16,7 +16,7 @@ const router = express.Router();
 
 router.put("/api/user", authenticateToken, async (req, res) => {
   try {
-    const { username, phoneNumber } = req.body;
+    const { username, phoneNumber, avatar } = req.body;
     const userID = req.user.user_id;
     const updated_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
 
@@ -32,6 +32,7 @@ router.put("/api/user", authenticateToken, async (req, res) => {
       .update({
         username: username,
         phone_number: phoneNumber,
+        avatar: avatar,
         updated_at: updated_at,
       })
       .eq("user_id", userID)

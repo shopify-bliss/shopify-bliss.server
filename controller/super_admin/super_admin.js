@@ -20,7 +20,7 @@ router.post("/api/add-admin", authenticateToken, async (req, res) => {
       });
     }
 
-    const { username, email, password, phoneNumber } = req.body;
+    const { username, email, password, phoneNumber,roleID } = req.body;
 
     // Validasi nomor telepon
     const phoneRegex = /^[0-9]{10,15}$/;
@@ -83,7 +83,7 @@ router.post("/api/add-admin", authenticateToken, async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const defaultRoleId = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+    // const defaultRoleId = "0057ae60-509f-40de-a637-b2b6fdc1569e";
 
     const { data: user, error: insertError } = await supabase
       .from("users")
@@ -91,7 +91,7 @@ router.post("/api/add-admin", authenticateToken, async (req, res) => {
         username: username,
         email: email,
         password: hashedPassword,
-        role_id: defaultRoleId,
+        role_id: roleID,
         created_at: created_at,
         updated_at: created_at,
         is_verified: true,
