@@ -234,8 +234,8 @@ router.delete("/api/access-management", authenticateToken, async (req, res) => {
         message: "Bad request: ID is required",
       });
     }
-
-    if (req.user.role !== "admin") {
+    
+    if (req.user.role !== "super_admin" || req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
