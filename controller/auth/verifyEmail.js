@@ -85,11 +85,7 @@ router.post("/api/otp-password", authenticateToken, async (req, res) => {
     if (userError || !user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    if (otp !== user) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
-    }
-
+    
     // Tandai bahwa OTP diverifikasi
     await supabase.from("users").update({ verification_code: null }).eq("user_id", userID);
 
