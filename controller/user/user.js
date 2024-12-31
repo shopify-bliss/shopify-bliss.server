@@ -202,7 +202,7 @@ router.get("/api/user", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    const { data: user, error: error } = await supabase.from("users").select(`*, roles(*)`).eq("user_id", userID);
+    const { data: user, error: error } = await supabase.from("users").select(`*, roles(*)`).eq("user_id", userID).single();
 
     if (error) {
       console.error("Error:", error);
