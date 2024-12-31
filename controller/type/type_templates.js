@@ -18,14 +18,13 @@ router.post("/api/type-templates", authenticateToken, async (req, res) => {
       });
     }
 
-    const { type, icon, nameClass } = req.body;
+    const { type, icon } = req.body;
 
     const { data: typeTemplate, error: insertError } = await supabase
-      .from("type_templates")
+      .from("page_templates")
       .insert({
         type: type,
         icon: icon,
-        name_class: nameClass,
       })
       .select("*");
 
@@ -53,7 +52,7 @@ router.post("/api/type-templates", authenticateToken, async (req, res) => {
 
 router.get("/api/type-templates", async (req, res) => {
   try {
-    const { data: typeTemplates, error: selectError } = await supabase.from("type_templates").select("*").order("created_at", { ascending: true });
+    const { data: typeTemplates, error: selectError } = await supabase.from("page_templates").select("*").order("created_at", { ascending: true });
 
     if (selectError) {
       console.error("Select error:", selectError);
@@ -92,7 +91,7 @@ router.get("/api/type-templates-id", async (req, res) => {
 
   try {
     // Ambil data dari Supabase berdasarkan ID
-    const { data: item, error } = await supabase.from("type_templates").select("*").eq("type_template_id", id).single();
+    const { data: item, error } = await supabase.from("page_templates").select("*").eq("type_template_id", id).single();
 
     // Tangani kesalahan yang terjadi saat query ke Supabase
     if (error) {
@@ -122,14 +121,13 @@ router.put("/api/type-templates", authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, message: "ID is required" });
     }
 
-    const { type, icon, nameClass } = req.body;
+    const { type, icon } = req.body;
 
     const { data: typeTemplate, error: updateError } = await supabase
-      .from("type_templates")
+      .from("page_templates")
       .update({
         type: type,
         icon: icon,
-        name_class: nameClass,
       })
       .eq("type_template_id", id)
       .select("*");
@@ -165,7 +163,7 @@ router.delete("/api/type-templates", authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, message: "ID is required" });
     }
 
-    const { data: typeTemplate, error: deleteError } = await supabase.from("type_templates").delete().eq("type_template_id", id).select("*");
+    const { data: typeTemplate, error: deleteError } = await supabase.from("page_templates").delete().eq("type_template_id", id).select("*");
 
     if (deleteError) {
       console.error("Delete error:", deleteError);
