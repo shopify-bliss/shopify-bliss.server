@@ -58,12 +58,12 @@ router.put("/api/user", authenticateToken, async (req, res) => {
   }
 });
 
-router.post("/api/send-otp", authenticateToken, async (req, res) => {
+router.post("/api/send-otp", async (req, res) => {
   try {
-    const userID = req.user.user_id;
+    const { email } = req.body;
 
     // Dapatkan email berdasarkan user ID
-    const { data: user, error: userError } = await supabase.from("users").select("email").eq("user_id", userID).single();
+    const { data: user, error: userError } = await supabase.from("users").select("email").eq("email", email).single();
 
     if (userError || !user) {
       return res.status(404).json({ message: "User not found" });
@@ -196,7 +196,7 @@ router.get("/api/all-user", authenticateToken, async (req, res) => {
 
 router.get("/api/user", authenticateToken, async (req, res) => {
   try {
-    const userID = req.user.user_id;
+    const userID = req.query;
 
     const { data: user, error } = await supabase.from("users").select(`*, roles(*)`).eq("user_id", userID).single();
 
