@@ -219,4 +219,32 @@ router.get("/api/user", authenticateToken, async (req, res) => {
   }
 });
 
+router.delete("/api/user", authenticateToken, async (req, res) => {
+  try {
+    const { userID } = req.query;
+
+    if (!userID) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const { data: user, error: error } = await supabase.from("users").delete().eq("user_id", userID).select("*");
+
+    if (error) {
+      console.error("Error:", error);
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User has been deleted",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 export default router;
