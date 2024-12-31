@@ -12,7 +12,7 @@ const router = express.Router();
 router.post("/api/sub-menu", authenticateToken, async (req, res) => {
   try {
     // Cek apakah pengguna memiliki peran admin
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "super_admin") {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
@@ -151,7 +151,7 @@ router.put("/api/sub-menu", authenticateToken, async (req, res) => {
     const { id } = req.query;
 
     // Cek apakah pengguna memiliki peran admin
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "super_admin") {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
