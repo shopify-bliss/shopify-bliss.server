@@ -177,7 +177,7 @@ router.put("/api/update-password", authenticateToken, async (req, res) => {
 
 router.get("/api/all-user", authenticateToken, async (req, res) => {
   try {
-    const { data: users, error } = await supabase.from("users").select("*");
+    const { data: users, error } = await supabase.from("users").select(`*, roles(*)`);
 
     if (error) {
       console.error("Error:", error);
