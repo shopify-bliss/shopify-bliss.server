@@ -13,10 +13,10 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
   try {
     const { menuID, roleID } = req.body;
 
-    console.log("Menu ID:", menuID, "Role ID:", roleID);
-    
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    // const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
 
-    if (req.user.role !== "super_admin") {
+    if (req.user.role_id !== superAdminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
@@ -156,7 +156,10 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
 
     const { roleID, menuID } = req.body;
 
-    if (req.user.role !== "admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    // const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
@@ -234,8 +237,10 @@ router.delete("/api/access-management", authenticateToken, async (req, res) => {
         message: "Bad request: ID is required",
       });
     }
-    
-    if (req.user.role !== "super_admin" || req.user.role !== "admin") {
+
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+
+    if (req.user.role_id !== superAdminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",

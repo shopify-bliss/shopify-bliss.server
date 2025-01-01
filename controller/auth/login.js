@@ -169,7 +169,9 @@ router.post("/auth/login", async (req, res) => {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
-        role: user.roles?.role_name, // Mengambil nama role dari relasi
+        phone_number: user.phone_number,
+        role: user.roles?.role_name,
+        role_id: user.roles?.role_id,
       },
       process.env.JWT_SECRET,
       {
@@ -181,7 +183,8 @@ router.post("/auth/login", async (req, res) => {
     res.json({
       message: "Login successfully.",
       data: {
-        role: user.roles?.role_name, // Mengembalikan nama role
+        role: user.roles?.role_name, 
+        role_id: user.roles?.role_id, 
       },
       token,
     });

@@ -11,8 +11,10 @@ const router = express.Router();
 
 router.post("/api/sub-menu", authenticateToken, async (req, res) => {
   try {
-    // Cek apakah pengguna memiliki peran admin
-    if (req.user.role !== "super_admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
@@ -150,8 +152,10 @@ router.put("/api/sub-menu", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 
-    // Cek apakah pengguna memiliki peran admin
-    if (req.user.role !== "super_admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
@@ -217,8 +221,10 @@ router.delete("/api/sub-menu", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 
-    // Cek apakah pengguna memiliki peran admin
-    if (req.user.role !== "super_admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
@@ -226,11 +232,7 @@ router.delete("/api/sub-menu", authenticateToken, async (req, res) => {
     }
 
     // Ambil submenu yang akan dihapus untuk mendapatkan menu_id dan default status
-    const { data: subMenuToDelete, error: fetchError } = await supabase
-      .from("sub_menus")
-      .select("menu_id, default")
-      .eq("sub_menu_id", id)
-      .single();
+    const { data: subMenuToDelete, error: fetchError } = await supabase.from("sub_menus").select("menu_id, default").eq("sub_menu_id", id).single();
 
     if (fetchError || !subMenuToDelete) {
       console.error("Fetch error:", fetchError);
@@ -241,11 +243,7 @@ router.delete("/api/sub-menu", authenticateToken, async (req, res) => {
     }
 
     // Hapus data sub-menu
-    const { data: deletedSubMenu, error: deleteError } = await supabase
-      .from("sub_menus")
-      .delete()
-      .eq("sub_menu_id", id)
-      .select("*");
+    const { data: deletedSubMenu, error: deleteError } = await supabase.from("sub_menus").delete().eq("sub_menu_id", id).select("*");
 
     if (deleteError) {
       console.error("Delete error:", deleteError);

@@ -11,7 +11,10 @@ const router = express.Router();
 
 router.post("/api/type-templates", authenticateToken, async (req, res) => {
   try {
-    if (req.user.role !== "admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
@@ -121,6 +124,16 @@ router.put("/api/type-templates", authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, message: "ID is required" });
     }
 
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have access to this resource",
+      });
+    }
+
     const { type, icon } = req.body;
 
     const { data: typeTemplate, error: updateError } = await supabase
@@ -161,6 +174,16 @@ router.delete("/api/type-templates", authenticateToken, async (req, res) => {
     // Memastikan ID disediakan dan valid
     if (!id) {
       return res.status(400).json({ success: false, message: "ID is required" });
+    }
+
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have access to this resource",
+      });
     }
 
     const { data: typeTemplate, error: deleteError } = await supabase.from("page_templates").delete().eq("type_template_id", id).select("*");

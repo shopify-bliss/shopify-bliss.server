@@ -13,14 +13,17 @@ const router = express.Router();
 
 router.post("/api/add-admin", authenticateToken, async (req, res) => {
   try {
-    if (req.user.role !== "super admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
       });
     }
 
-    const { username, email, password, phoneNumber,roleID } = req.body;
+    const { username, email, password, phoneNumber, roleID } = req.body;
 
     // Validasi nomor telepon
     const phoneRegex = /^[0-9]{10,15}$/;
@@ -128,7 +131,10 @@ router.put("/api/role-update", authenticateToken, async (req, res) => {
   try {
     const { userID, role } = req.body;
 
-    if (req.user.role !== "super admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
