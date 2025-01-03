@@ -66,28 +66,41 @@ router.post("/auth/verify-email", async (req, res) => {
   }
 });
 
-router.post("/api/otp-password", authenticateToken, async (req, res) => {
+router.post("/api/otp-password", async (req, res) => {
   try {
-    const { otp } = req.body;
-    const userID = req.user.user_id;
+    const { otp, email } = req.body;
 
-    if (!otp) {
-      return res.status(400).json({ message: "OTP is required" });
+    if (!otp || !email) {
+      return res.status(400).json({ message: "OTP and email are required" });
     }
 
     // Cek kecocokan OTP
-    const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("verification_code")
-      .eq("user_id", userID)
-      .single();
+    const { data: user, error: userError } = await supabase.from("users").select("verification_code").eq("email", email).single();
 
     if (userError || !user) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    console.log("user", user.verification_code);
     
+
+    // Validasi OTP
+    if (otp != user.verification_code) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
     // Tandai bahwa OTP diverifikasi
-    await supabase.from("users").update({ verification_code: null }).eq("user_id", userID);
+    const { error: updateError } = await supabase.from("users").update({ verification_code: null }).eq("email", email);
+
+    if (updateError) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update user information",
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -98,6 +111,5 @@ router.post("/api/otp-password", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 export default router;

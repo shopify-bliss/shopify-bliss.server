@@ -82,7 +82,7 @@ router.post("/api/send-otp", async (req, res) => {
   }
 });
 
-router.put("/api/update-password", authenticateToken, async (req, res) => {
+router.put("/api/update-password", async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
     const userID = req.user.user_id;
