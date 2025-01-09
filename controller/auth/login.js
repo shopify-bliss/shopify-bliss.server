@@ -74,7 +74,7 @@ router.get("/auth/google/callback", async (req, res) => {
             created_at: created_at,
             updated_at: created_at,
             is_verified: true,
-            role: "customer",
+            role_id: "cebccb98-7ef0-4184-95b9-7320329f21d3",
           },
         ])
         .select("*")
@@ -99,7 +99,7 @@ router.get("/auth/google/callback", async (req, res) => {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
-        role: user.role,
+        role: user.roles?.role_name,
       },
       process.env.JWT_SECRET,
       {
@@ -107,7 +107,7 @@ router.get("/auth/google/callback", async (req, res) => {
       }
     );
 
-    return res.redirect(`https://shopify-bliss.vercel.app/login?shopify-bliss=${token}&role=${user.role}`);
+    return res.redirect(`https://shopify-bliss.vercel.app/login?shopify-bliss=${token}`);
   } catch (error) {
     console.error("Error during Google OAuth:", error?.response?.data || error.message);
     return res.status(500).json({
@@ -183,8 +183,8 @@ router.post("/auth/login", async (req, res) => {
     res.json({
       message: "Login successfully.",
       data: {
-        role: user.roles?.role_name, 
-        role_id: user.roles?.role_id, 
+        role: user.roles?.role_name,
+        role_id: user.roles?.role_id,
       },
       token,
     });
