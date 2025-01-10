@@ -17,11 +17,12 @@ import access from "./controller/access/access.js";
 import role from "./controller/auth/role.js";
 import superAdmin from "./controller/super_admin/super_admin.js";
 import color from "./controller/color/color.js";
+import colorDesign from "./controller/color/color_design.js";
 import font from "./controller/font/font.js";
-import fontDesign from "./controller/font/font_designs.js";
+import fontDesign from "./controller/font/font_design.js";
 
 import configureMiddleware from "./config/middleware.js";
-import "./helper/cronJob.js"
+import "./helper/cronJob.js";
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ app.use(access);
 app.use(role);
 app.use(superAdmin);
 app.use(color);
+app.use(colorDesign);
 app.use(font);
 app.use(fontDesign);
 
