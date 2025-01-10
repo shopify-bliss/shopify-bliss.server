@@ -1,58 +1,43 @@
 import express from "express";
 
-import configureMiddleware from "./../../config/middleware.js";
-import supabase from "./../../config/supabase.js";
+import configureMiddleware from "../../config/middleware.js";
+import supabase from "../../config/supabase.js";
 
-import authenticateToken from "./../../helper/token.js";
+import authenticateToken from "../../helper/token.js";
 
 const app = express();
 configureMiddleware(app);
 const router = express.Router();
 
+// Create a new color
 router.post("/api/color", authenticateToken, async (req, res) => {
   try {
-    const { brand, color1, color2, color3 } = req.body;
+    const { color } = req.body;
 
-    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
-    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
-
-    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
-      return res.status(403).json({
-        success: false,
-        message: "Forbidden: You do not have access to this resource",
-      });
-    }
-
-    if (!brand || !color1 || !color2 || !color3) {
+    if (!color) {
       return res.status(400).json({
         success: false,
-        message: "Please fill in all fields",
+        message: "Bad request: Color is required",
       });
     }
 
-    const { data: color, error: insertError } = await supabase
-      .from("colors")
-      .insert({
-        brand,
-        color1,
-        color2,
-        color3,
-      })
-      .select("*");
+    const { data: newColor, error: insertError } = await supabase.from("colors").insert({ color }).select("*");
 
     if (insertError) {
+      console.error("Insert error:", insertError);
       return res.status(500).json({
         success: false,
-        message: "Error inserting color",
+        message: insertError.message,
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: color,
+      message: "Color has been added",
+      data: newColor,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -60,23 +45,26 @@ router.post("/api/color", authenticateToken, async (req, res) => {
   }
 });
 
+// Retrieve all colors
 router.get("/api/color", async (req, res) => {
   try {
-    const { data: colors, error } = await supabase.from("colors").select("*").order("created_at", { ascending: true });
+    const { data: colors, error: getError } = await supabase.from("colors").select("*").order("created_at", { ascending: true });
 
-    if (error) {
+    if (getError) {
+      console.error("Get error:", getError);
       return res.status(500).json({
         success: false,
-        message: "Error fetching colors",
+        message: getError.message,
       });
     }
 
     return res.status(200).json({
       success: true,
+      message: "Colors have been retrieved",
       data: colors,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -84,6 +72,7 @@ router.get("/api/color", async (req, res) => {
   }
 });
 
+// Retrieve color by ID
 router.get("/api/color-id", async (req, res) => {
   try {
     const { id } = req.query;
@@ -91,25 +80,34 @@ router.get("/api/color-id", async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "Please provide an ID",
+        message: "Bad request: ID is required",
       });
     }
 
-    const { data: color, error } = await supabase.from("colors").select("*").eq("color_id", id);
+    const { data: color, error: getError } = await supabase.from("colors").select("*").eq("color_id", id).single();
 
-    if (error) {
+    if (getError) {
+      console.error("Get error:", getError);
       return res.status(500).json({
         success: false,
-        message: "Error fetching color",
+        message: getError.message,
+      });
+    }
+
+    if (!color) {
+      return res.status(404).json({
+        success: false,
+        message: `Color with id = ${id} not found`,
       });
     }
 
     return res.status(200).json({
       success: true,
+      message: "Color has been retrieved",
       data: color,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -117,60 +115,43 @@ router.get("/api/color-id", async (req, res) => {
   }
 });
 
+// Update color by ID
 router.put("/api/color", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
+    const { color } = req.body;
 
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "Please provide an ID",
+        message: "Bad request: ID is required",
       });
     }
 
-    const { data: color, error } = await supabase.from("colors").select("*").eq("color_id", id);
-
-    if (error) {
-      return res.status(404).json({
-        success: false,
-        message: "ID Not Found",
-      });
-    }
-
-    const { brand, color1, color2, color3 } = req.body;
-
-    if (!brand || !color1 || !color2 || !color3) {
+    if (!color) {
       return res.status(400).json({
         success: false,
-        message: "Please fill in all fields",
+        message: "Bad request: Color is required",
       });
     }
 
-    const { data: updatedColor, error: updateError } = await supabase
-      .from("colors")
-      .update({
-        brand,
-        color1,
-        color2,
-        color3,
-      })
-      .eq("color_id", id)
-      .select("*");
+    const { data: updatedColor, error: updateError } = await supabase.from("colors").update({ color }).eq("color_id", id).select("*");
 
     if (updateError) {
+      console.error("Update error:", updateError);
       return res.status(500).json({
         success: false,
-        message: "Error updating color",
+        message: updateError.message,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Color updated successfully",
+      message: "Color has been updated",
       data: updatedColor,
     });
   } catch (error) {
-    console.log("Error:", error);
+    console.error("Error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -178,6 +159,7 @@ router.put("/api/color", authenticateToken, async (req, res) => {
   }
 });
 
+// Delete color by ID
 router.delete("/api/color", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
@@ -185,35 +167,27 @@ router.delete("/api/color", authenticateToken, async (req, res) => {
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "Please provide an ID",
+        message: "Bad request: ID is required",
       });
     }
 
-    const { data: color, error } = await supabase.from("colors").select("*").eq("color_id", id);
-
-    if (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Color not found",
-      });
-    }
-
-    const { data: deleteColor, error: deleteError } = await supabase.from("colors").delete().eq("color_id", id);
+    const { data: deletedColor, error: deleteError } = await supabase.from("colors").delete().eq("color_id", id).select("*");
 
     if (deleteError) {
+      console.error("Delete error:", deleteError);
       return res.status(500).json({
         success: false,
-        message: "Error deleting color",
+        message: deleteError.message,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Color deleted successfully",
-      data: deleteColor,
+      message: "Color has been deleted",
+      data: deletedColor,
     });
   } catch (error) {
-    console.log("Error:", error);
+    console.error("Error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

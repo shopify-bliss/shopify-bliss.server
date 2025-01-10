@@ -12,17 +12,16 @@ const router = express.Router();
 // Create a new font
 router.post("/api/font", authenticateToken, async (req, res) => {
   try {
-    const { brand, fontType1, fontType2, group } = req.body;
+    const { name } = req.body;
 
-    const { data: fonts, error: insertError } = await supabase
-      .from("fonts")
-      .insert({
-        brand,
-        fontType1,
-        fontType2,
-        group,
-      })
-      .select("*");
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: "Bad request: Name is required",
+      });
+    }
+
+    const { data: fonts, error: insertError } = await supabase.from("fonts").insert({ name }).select("*");
 
     if (insertError) {
       console.error("Insert error:", insertError);
@@ -47,7 +46,7 @@ router.post("/api/font", authenticateToken, async (req, res) => {
 });
 
 // Retrieve all fonts
-router.get("/api/font", async (req, res) => {
+router.get("/api/fonts", async (req, res) => {
   try {
     const { data: fonts, error: getError } = await supabase.from("fonts").select("*").order("created_at", { ascending: true });
 
@@ -74,7 +73,7 @@ router.get("/api/font", async (req, res) => {
 });
 
 // Retrieve font by ID
-router.get("/api/font-id", async (req, res) => {
+router.get("/api/font", async (req, res) => {
   try {
     const { id } = req.query;
 
@@ -85,7 +84,7 @@ router.get("/api/font-id", async (req, res) => {
       });
     }
 
-    const { data: font, error: getError } = await supabase.from("fonts").select("*").eq("font_id", id);
+    const { data: font, error: getError } = await supabase.from("fonts").select("*").eq("font_id", id).single();
 
     if (getError) {
       console.error("Get error:", getError);
@@ -95,7 +94,7 @@ router.get("/api/font-id", async (req, res) => {
       });
     }
 
-    if (font.length === 0) {
+    if (!font) {
       return res.status(404).json({
         success: false,
         message: `Font with id = ${id} not found`,
@@ -120,6 +119,7 @@ router.get("/api/font-id", async (req, res) => {
 router.put("/api/font", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
+    const { name } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -128,18 +128,14 @@ router.put("/api/font", authenticateToken, async (req, res) => {
       });
     }
 
-    const { brand, fontType1, fontType2, group } = req.body;
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: "Bad request: Name is required",
+      });
+    }
 
-    const { data: font, error: updateError } = await supabase
-      .from("fonts")
-      .update({
-        brand,
-        fontType1,
-        fontType2,
-        group,
-      })
-      .eq("font_id", id)
-      .select("*");
+    const { data: font, error: updateError } = await supabase.from("fonts").update({ name }).eq("font_id", id).select("*");
 
     if (updateError) {
       console.error("Update error:", updateError);
