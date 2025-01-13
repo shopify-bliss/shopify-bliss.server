@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.post("/api/ai-builder", async (req, res) => {
   try {
-    const { siteTitle, brandID, fontID, colorID } = req.body;
+    const { siteTitle, brandID, fontID, colorID, userID } = req.body;
     const created_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
 
     const { data: aiBuilder, error: insertError } = await supabase
@@ -22,6 +22,7 @@ router.post("/api/ai-builder", async (req, res) => {
         brand_id: brandID,
         font_id: fontID,
         color_id: colorID,
+        user_id: userID,
         created_at: created_at,
         updated_at: created_at,
       })
