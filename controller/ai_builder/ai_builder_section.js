@@ -12,17 +12,17 @@ const router = express.Router();
 
 router.post("/api/ai-builder-section", async (req, res) => {
   try {
-    const { styleDesign, supportID, sectionID, pageID, aiBuilderID } = req.body;
+    const { styleDesign, aiBuilderSupportID, sectionID, pageID, aiBuilderID } = req.body;
     const created_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
 
     const { data: aiBuilderSection, error: insertError } = await supabase
       .from("ai_builder_sections")
       .insert({
-        ai_builder_id: aiBuilderID,
         style_design: styleDesign,
         section_id: sectionID,
         page_id: pageID,
-        support_id: supportID,
+        ai_builder_id: aiBuilderID,
+        ai_builer_support_id: aiBuilderSupportID,
         created_at: created_at,
         updated_at: created_at,
       })
@@ -52,7 +52,7 @@ router.post("/api/ai-builder-section", async (req, res) => {
 
 router.get("/api/ai-builder-section", async (req, res) => {
   try {
-    const { data: aiBuilderSection, error: selectError } = await supabase.from("ai_builder_sections").select(`*, sections:section_id(*), users:user_id(*), pages:page_id(*)`);
+    const { data: aiBuilderSection, error: selectError } = await supabase.from("ai_builder_sections").select(`*, sections:section_id(*), users:user_id(*), pages:page_id(*), ai_builder_supports:ai_builder_support_id(*)`);
 
     if (selectError) {
       console.error("Select error:", selectError);
