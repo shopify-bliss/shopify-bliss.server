@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.post("/api/ai-builder-style", async (req, res) => {
   try {
-    const { styleDesign, aiBuilderPageID, sectionID } = req.body;
+    const { styleDesign, aiBuilderPageID, sectionID, userID } = req.body;
     const created_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
 
     const { data: aiBuilderStyle, error: insertError } = await supabase
@@ -21,6 +21,7 @@ router.post("/api/ai-builder-style", async (req, res) => {
         style_design: styleDesign,
         ai_builder_pages_id: aiBuilderPageID,
         section_id: sectionID,
+        user_id: userID,
         created_at: created_at,
         updated_at: created_at,
       })
@@ -50,7 +51,7 @@ router.post("/api/ai-builder-style", async (req, res) => {
 
 router.get("/api/ai-builder-style", async (req, res) => {
   try {
-    const { data: aiBuilderStyle, error: selectError } = await supabase.from("ai_builder_styles").select(`*, ai_builder_pages:ai_builder_pages_id(*), sections:section_id(*)`);
+    const { data: aiBuilderStyle, error: selectError } = await supabase.from("ai_builder_styles").select(`*, ai_builder_pages:ai_builder_pages_id(*), sections:section_id(*), users:user_id(*)`);
 
     if (selectError) {
       console.error("Select error:", selectError);
