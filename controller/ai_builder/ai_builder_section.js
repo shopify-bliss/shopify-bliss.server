@@ -10,13 +10,13 @@ const app = express();
 configureMiddleware(app);
 const router = express.Router();
 
-router.post("/api/ai-builder-style", async (req, res) => {
+router.post("/api/ai-builder-section", async (req, res) => {
   try {
     const { styleDesign, supportID, sectionID, pageID, aiBuilderID } = req.body;
     const created_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
 
-    const { data: aiBuilderStyle, error: insertError } = await supabase
-      .from("ai_builder_styles")
+    const { data: aiBuilderSection, error: insertError } = await supabase
+      .from("ai_builder_sections")
       .insert({
         ai_builder_id: aiBuilderID,
         style_design: styleDesign,
@@ -39,7 +39,7 @@ router.post("/api/ai-builder-style", async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Ai Builder Style has been added",
-      data: aiBuilderStyle,
+      data: aiBuilderSection,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -50,9 +50,9 @@ router.post("/api/ai-builder-style", async (req, res) => {
   }
 });
 
-router.get("/api/ai-builder-style", async (req, res) => {
+router.get("/api/ai-builder-section", async (req, res) => {
   try {
-    const { data: aiBuilderStyle, error: selectError } = await supabase.from("ai_builder_styles").select(`*, sections:section_id(*), users:user_id(*), pages:page_id(*)`);
+    const { data: aiBuilderSection, error: selectError } = await supabase.from("ai_builder_sections").select(`*, sections:section_id(*), users:user_id(*), pages:page_id(*)`);
 
     if (selectError) {
       console.error("Select error:", selectError);
@@ -64,7 +64,7 @@ router.get("/api/ai-builder-style", async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      data: aiBuilderStyle,
+      data: aiBuilderSection,
     });
   } catch (error) {
     console.error("Error:", error);

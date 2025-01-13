@@ -21,7 +21,8 @@ import colorDesign from "./controller/color/color_design.js";
 import font from "./controller/font/font.js";
 import fontDesign from "./controller/font/font_design.js";
 import AiBuilder from "./controller/ai_builder/ai_builder.js";
-import AiBuilderStyle from "./controller/ai_builder/ai_builder_style.js";
+import AiBuilderSection from "./controller/ai_builder/ai_builder_section.js";
+import AiBuilderSupport from "./controller/ai_builder/ai_builder_support.js";
 
 import configureMiddleware from "./config/middleware.js";
 import "./helper/cronJob.js";
@@ -54,7 +55,8 @@ app.use(colorDesign);
 app.use(font);
 app.use(fontDesign);
 app.use(AiBuilder);
-app.use(AiBuilderStyle);
+app.use(AiBuilderSection);
+app.use(AiBuilderSupport);
 
 app.listen(port, () => {
   console.log(`running server on port ${port}`);
