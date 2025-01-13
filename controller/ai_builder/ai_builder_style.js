@@ -20,7 +20,6 @@ router.post("/api/ai-builder-style", async (req, res) => {
       .insert({
         ai_builder_id: aiBuilderID,
         style_design: styleDesign,
-        ai_builder_pages_id: aiBuilderPageID,
         section_id: sectionID,
         page_id: pageID,
         created_at: created_at,
@@ -52,7 +51,7 @@ router.post("/api/ai-builder-style", async (req, res) => {
 
 router.get("/api/ai-builder-style", async (req, res) => {
   try {
-    const { data: aiBuilderStyle, error: selectError } = await supabase.from("ai_builder_styles").select(`*, ai_builder_pages:ai_builder_pages_id(*), sections:section_id(*), users:user_id(*), pages:page_id(*)`);
+    const { data: aiBuilderStyle, error: selectError } = await supabase.from("ai_builder_styles").select(`*, sections:section_id(*), users:user_id(*), pages:page_id(*)`);
 
     if (selectError) {
       console.error("Select error:", selectError);
