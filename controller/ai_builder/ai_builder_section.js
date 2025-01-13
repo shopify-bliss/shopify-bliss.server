@@ -22,7 +22,7 @@ router.post("/api/ai-builder-section", async (req, res) => {
         section_id: sectionID,
         page_id: pageID,
         ai_builder_id: aiBuilderID,
-        ai_builer_support_id: aiBuilderSupportID,
+        ai_builder_support_id: aiBuilderSupportID,
         created_at: created_at,
         updated_at: created_at,
       })
