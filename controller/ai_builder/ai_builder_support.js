@@ -10,14 +10,14 @@ const router = express.Router();
 
 router.post("/api/ai-builder-support", async (req, res) => {
   try {
-    const { aiBuilderID, pageID, supportID, styleDesign } = req.body;
+    const { aiBuilderID, supportID, styleDesign } = req.body;
     const created_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
 
     const { data: aiBuilderSupport, error: insertError } = await supabase
       .from("ai_builder_supports")
       .insert({
         ai_builder_id: aiBuilderID,
-        page_id: pageID,
+        // page_id: pageID,
         support_id: supportID,
         style_design: styleDesign,
         created_at: created_at,
@@ -51,7 +51,6 @@ router.get("/api/ai-builder-support", async (req, res) => {
   try {
     const { data: aiBuilderSupport, error: selectError } = await supabase.from("ai_builder_supports").select(`
         *,
-        page_id:page_templates!ai_builder_support_page_id_fkey(*),
         support_id:page_templates!ai_builder_supports_support_id_fkey(*),
         ai_builder:ai_builder_id(*)
       `);
