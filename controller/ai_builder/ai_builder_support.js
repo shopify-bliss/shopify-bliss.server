@@ -90,7 +90,8 @@ router.get("/api/ai-builder-support-id", async (req, res) => {
     const { data: aiBuilderSupports, error: selectError } = await supabase
       .from("ai_builder_supports")
       .select(
-        `*,support_id:page_templates!ai_builder_supports_support_id_fkey(*),
+        `*,
+        page_templates(*),
         ai_builder:ai_builder_id(*)`
       )
       .eq("ai_builder_id", id);
