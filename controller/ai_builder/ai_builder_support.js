@@ -76,4 +76,51 @@ router.get("/api/ai-builder-support", async (req, res) => {
   }
 });
 
+router.get("/api/ai-builder-support-id", async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Parameter id is required",
+      });
+    }
+
+    const { data: aiBuilderSupports, error: selectError } = await supabase
+      .from("ai_builder_supports")
+      .select(
+        `*,support_id:page_templates!ai_builder_supports_support_id_fkey(*),
+        ai_builder:ai_builder_id(*)`
+      )
+      .eq("ai_builder_id", id);
+
+    if (selectError) {
+      console.error("Select error:", selectError);
+      return res.status(500).json({
+        success: false,
+        message: selectError.message,
+      });
+    }
+
+    if (!aiBuilderSupports || aiBuilderSupports.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No support data found for the given aiBuilderID",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: aiBuilderSupports,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 export default router;

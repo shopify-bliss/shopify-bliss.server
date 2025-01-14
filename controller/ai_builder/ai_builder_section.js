@@ -74,4 +74,45 @@ router.get("/api/ai-builder-section", async (req, res) => {
   }
 });
 
+router.get("/api/ai-builder-section-id", async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Parameter id is required",
+      });
+    }
+
+    const { data: aiBuilderSections, error: selectError } = await supabase.from("ai_builder_sections").select(`*, sections:section_id(*), pages:page_id(*)`).eq("ai_builder_id", id);
+
+    if (selectError) {
+      console.error("Select error:", selectError);
+      return res.status(500).json({
+        success: false,
+        message: selectError.message,
+      });
+    }
+
+    if (!aiBuilderSections || aiBuilderSections.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No sections found for the given aiBuilderID",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: aiBuilderSections,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 export default router;
