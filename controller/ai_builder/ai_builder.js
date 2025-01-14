@@ -52,7 +52,7 @@ router.post("/api/ai-builder", async (req, res) => {
 
 router.get("/api/ai-builder", async (req, res) => {
   try {
-    const { data: aiBuilder, error: selectError } = await supabase.from("ai_builders").select(`*, brand:brand_id(*), font:font_id(*), color:color_id(*)`);
+    const { data: aiBuilder, error: selectError } = await supabase.from("ai_builders").select(`*, brand:brand_id(*), font:font_id(*), color:color_id(*), user:user_id(*)`);
 
     if (selectError) {
       console.error("Select error:", selectError);

@@ -51,7 +51,7 @@ router.post("/api/ai-builder-section", async (req, res) => {
 
 router.get("/api/ai-builder-section", async (req, res) => {
   try {
-    const { data: aiBuilderSection, error: selectError } = await supabase.from("ai_builder_sections").select(`*, sections:section_id(*), users:user_id(*), pages:page_id(*)`);
+    const { data: aiBuilderSection, error: selectError } = await supabase.from("ai_builder_sections").select(`*, sections:section_id(*), pages:page_id(*)`);
 
     if (selectError) {
       console.error("Select error:", selectError);
