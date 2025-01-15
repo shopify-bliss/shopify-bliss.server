@@ -110,4 +110,40 @@ router.get("/api/ai-builder-id", authenticateToken, async (req, res) => {
   }
 });
 
+router.get("/api/ai-builder-id-builder", authenticateToken, async (req, res) => {
+  try {
+    const userID = req.user.user_id;
+    const { id } = req.query;
+
+    const { data: aiBuilder, error: selectError } = await supabase.from("ai_builders").select(`*,brand:brand_id(*), font:font_id(*), color:color_id(*)`).eq("user_id", userID).eq("ai_builder_id", id);
+
+    if (selectError) {
+      console.error("Select error:", selectError);
+      return res.status(500).json({
+        success: false,
+        message: selectError.message,
+      });
+    }
+
+    // Jika data kosong
+    if (!aiBuilder || aiBuilder.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User belum memiliki page",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: aiBuilder,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 export default router;
