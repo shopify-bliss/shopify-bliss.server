@@ -21,10 +21,10 @@ router.post("/api/sub-menu", authenticateToken, async (req, res) => {
       });
     }
 
-    const { menuID, name, defaults } = req.body;
+    const { menuID, name, defaults, isDevelope } = req.body;
 
     // Validasi input
-    if (!menuID || !name || defaults === undefined) {
+    if (!menuID || !name || defaults === undefined || !isDevelope) {
       return res.status(400).json({
         success: false,
         message: "menuID, name, and defaults are required.",
@@ -62,6 +62,7 @@ router.post("/api/sub-menu", authenticateToken, async (req, res) => {
         name,
         menu_id: menuID,
         default: defaults,
+        is_develope: isDevelope,
       })
       .select("*");
 
@@ -162,10 +163,10 @@ router.put("/api/sub-menu", authenticateToken, async (req, res) => {
       });
     }
 
-    const { name, defaults, menuID } = req.body;
+    const { name, defaults, menuID, isDevelope } = req.body;
 
     // Validasi input
-    if (!menuID || !name || defaults === undefined) {
+    if (!menuID || !name || defaults === undefined || !isDevelope) {
       return res.status(400).json({
         success: false,
         message: "menuID, name, and defaults are required.",
@@ -191,6 +192,7 @@ router.put("/api/sub-menu", authenticateToken, async (req, res) => {
         name,
         menu_id: menuID,
         default: defaults,
+        is_develope: isDevelope,
       })
       .eq("sub_menu_id", id)
       .select("*");

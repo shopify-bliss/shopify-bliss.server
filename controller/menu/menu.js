@@ -21,9 +21,9 @@ router.post("/api/menu", authenticateToken, async (req, res) => {
       });
     }
 
-    const { name, url } = req.body;
+    const { name, url, isDevelope } = req.body;
 
-    if (!name || !url) {
+    if (!name || !url || !isDevelope) {
       return res.status(400).json({
         success: false,
         message: "Name and URL are required",
@@ -35,6 +35,7 @@ router.post("/api/menu", authenticateToken, async (req, res) => {
       .insert({
         name: name,
         url: url,
+        is_develope: isDevelope,
       })
       .select("*");
 
@@ -147,9 +148,9 @@ router.put("/api/menu", authenticateToken, async (req, res) => {
       });
     }
 
-    const { name, url } = req.body;
+    const { name, url, isDevelope } = req.body;
 
-    if (!name || !url) {
+    if (!name || !url || !isDevelope) {
       return res.status(400).json({
         success: false,
         message: "Name, and URL are required",
@@ -161,6 +162,7 @@ router.put("/api/menu", authenticateToken, async (req, res) => {
       .update({
         name: name,
         url: url,
+        is_develope: isDevelope,
       })
       .eq("menu_id", id)
       .select("*");

@@ -12,16 +12,16 @@ const router = express.Router();
 // Create a new font
 router.post("/api/font", authenticateToken, async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, isDevelope } = req.body;
 
-    if (!name) {
+    if (!name || !isDevelope) {
       return res.status(400).json({
         success: false,
         message: "Bad request: Name is required",
       });
     }
 
-    const { data: fonts, error: insertError } = await supabase.from("fonts").insert({ name }).select("*");
+    const { data: fonts, error: insertError } = await supabase.from("fonts").insert({ name, is_develope: isDevelope }).select("*");
 
     if (insertError) {
       console.error("Insert error:", insertError);

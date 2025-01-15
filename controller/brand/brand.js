@@ -21,7 +21,7 @@ router.post("/api/brand", authenticateToken, async (req, res) => {
       });
     }
 
-    const { name, fontClass, fontClassReverse } = req.body;
+    const { name, fontClass, fontClassReverse, isDevelope } = req.body;
 
     const { data: brands, error: insertError } = await supabase
       .from("brands")
@@ -29,6 +29,7 @@ router.post("/api/brand", authenticateToken, async (req, res) => {
         name: name,
         font_class: fontClass,
         font_class_reverse: fontClassReverse,
+        is_develope: isDevelope,
       })
       .select("*");
 
@@ -143,7 +144,7 @@ router.put("/api/brand", authenticateToken, async (req, res) => {
       });
     }
 
-    const { name, fontClass, fontClassReverse } = req.body;
+    const { name, fontClass, fontClassReverse, isDevelope } = req.body;
 
     const { data: brand, error: updateError } = await supabase
       .from("brands")
@@ -151,6 +152,7 @@ router.put("/api/brand", authenticateToken, async (req, res) => {
         name: name,
         font_class: fontClass,
         font_class_reverse: fontClassReverse,
+        is_develope: isDevelope,
       })
       .eq("brand_id", id)
       .select("*");

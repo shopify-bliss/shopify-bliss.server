@@ -12,16 +12,16 @@ const router = express.Router();
 // Create a new color
 router.post("/api/color", authenticateToken, async (req, res) => {
   try {
-    const { color } = req.body;
+    const { color, isDevelope } = req.body;
 
-    if (!color) {
+    if (!color || !isDevelope) {
       return res.status(400).json({
         success: false,
         message: "Bad request: Color is required",
       });
     }
 
-    const { data: newColor, error: insertError } = await supabase.from("colors").insert({ color }).select("*");
+    const { data: newColor, error: insertError } = await supabase.from("colors").insert({ color, is_develope: isDevelope }).select("*");
 
     if (insertError) {
       console.error("Insert error:", insertError);
@@ -119,7 +119,7 @@ router.get("/api/color-id", async (req, res) => {
 router.put("/api/color", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
-    const { color } = req.body;
+    const { color, isDevelope } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -128,14 +128,14 @@ router.put("/api/color", authenticateToken, async (req, res) => {
       });
     }
 
-    if (!color) {
+    if (!color || !isDevelope) {
       return res.status(400).json({
         success: false,
         message: "Bad request: Color is required",
       });
     }
 
-    const { data: updatedColor, error: updateError } = await supabase.from("colors").update({ color }).eq("color_id", id).select("*");
+    const { data: updatedColor, error: updateError } = await supabase.from("colors").update({ color, is_develope: isDevelope }).eq("color_id", id).select("*");
 
     if (updateError) {
       console.error("Update error:", updateError);
