@@ -1,0 +1,35 @@
+[
+  {
+    "filePath": "E:\\Backup\\ULBI_Informatika\\Semester_5\\Proyek 3\\Program\\shopify-bliss.server\\controller\\ai_builder\\ai_builder.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\Backup\\ULBI_Informatika\\Semester_5\\Proyek 3\\Program\\shopify-bliss.server\\controller\\ai_builder\\ai_builder_section.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  },
+  {
+    "filePath": "E:\\Backup\\ULBI_Informatika\\Semester_5\\Proyek 3\\Program\\shopify-bliss.server\\controller\\ai_builder\\ai_builder_support.js",
+    "messages": [],
+    "suppressedMessages": [],
+    "errorCount": 0,
+    "fatalErrorCount": 0,
+    "warningCount": 0,
+    "fixableErrorCount": 0,
+    "fixableWarningCount": 0,
+    "usedDeprecatedRules": []
+  }
+]

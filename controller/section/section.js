@@ -106,7 +106,13 @@ router.get("/api/section-templates-id", async (req, res) => {
       success: true,
       data: section,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.log("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    })
+  }
 });
 
 router.put("/api/section-templates", authenticateToken, async (req, res) => {

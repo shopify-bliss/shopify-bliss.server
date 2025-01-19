@@ -23,7 +23,7 @@ router.post("/api/menu", authenticateToken, async (req, res) => {
 
     const { name, url, isDevelope } = req.body;
 
-    if (!name || !url || !isDevelope) {
+    if (!name || !url) {
       return res.status(400).json({
         success: false,
         message: "Name and URL are required",
@@ -150,7 +150,7 @@ router.put("/api/menu", authenticateToken, async (req, res) => {
 
     const { name, url, isDevelope } = req.body;
 
-    if (!name || !url || !isDevelope) {
+    if (!name || !url) {
       return res.status(400).json({
         success: false,
         message: "Name, and URL are required",

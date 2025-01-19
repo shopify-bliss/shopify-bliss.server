@@ -14,7 +14,7 @@ router.post("/api/color", authenticateToken, async (req, res) => {
   try {
     const { color, isDevelope } = req.body;
 
-    if (!color || !isDevelope) {
+    if (!color) {
       return res.status(400).json({
         success: false,
         message: "Bad request: Color is required",
@@ -128,7 +128,7 @@ router.put("/api/color", authenticateToken, async (req, res) => {
       });
     }
 
-    if (!color || !isDevelope) {
+    if (!color) {
       return res.status(400).json({
         success: false,
         message: "Bad request: Color is required",

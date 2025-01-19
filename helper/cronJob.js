@@ -16,6 +16,8 @@ cron.schedule("* * * * *", async () => {
       .match({ is_verified: false })
       .lte("expires_at", currentTime);
 
+    console.log("Deleted expired accounts:", data);
+
     if (error) {
       console.error("Error deleting expired accounts:", error);
       return;

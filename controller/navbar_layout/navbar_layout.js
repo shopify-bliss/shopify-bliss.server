@@ -209,6 +209,7 @@ router.delete("/api/navbar-layout", authenticateToken, async (req, res) => {
     return res.json({
       success: true,
       message: "Navbar layout has been deleted",
+      data: navbarLayout,
     });
   } catch (error) {
     console.log("Error:", error);

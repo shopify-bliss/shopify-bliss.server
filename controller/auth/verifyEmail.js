@@ -1,10 +1,7 @@
 import express from "express";
-import jwt from "jsonwebtoken";
-import moment from "moment";
 
 import supabase from "./../../config/supabase.js";
 import configureMiddleware from "./../../config/middleware.js";
-import authenticateToken from "../../helper/token.js";
 
 const app = express();
 configureMiddleware(app);
@@ -59,6 +56,7 @@ router.post("/auth/verify-email", async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Email verified successfully.",
+      data,
     });
   } catch (error) {
     console.error("Error:", error);

@@ -107,6 +107,8 @@ router.post("/auth/registration", async (req, res) => {
       },
     ]);
 
+    console.log("data", data);
+    
     if (error) {
       throw new Error(error.message);
     }

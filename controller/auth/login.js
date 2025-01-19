@@ -101,6 +101,7 @@ router.get("/auth/google/callback", async (req, res) => {
         email: user.email,
         role: user.roles?.role_name,
       },
+      // eslint-disable-next-line no-undef
       process.env.JWT_SECRET,
       {
         expiresIn: "24h",
@@ -173,9 +174,10 @@ router.post("/auth/login", async (req, res) => {
         role: user.roles?.role_name,
         role_id: user.roles?.role_id,
       },
+      // eslint-disable-next-line no-undef
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "24h",
       }
     );
 

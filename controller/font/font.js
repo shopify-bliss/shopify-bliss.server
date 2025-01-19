@@ -14,7 +14,7 @@ router.post("/api/font", authenticateToken, async (req, res) => {
   try {
     const { name, isDevelope } = req.body;
 
-    if (!name || !isDevelope) {
+    if (!name) {
       return res.status(400).json({
         success: false,
         message: "Bad request: Name is required",
@@ -119,7 +119,7 @@ router.get("/api/font", async (req, res) => {
 router.put("/api/font", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
-    const { name } = req.body;
+    const { name, isDevelope } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -135,7 +135,7 @@ router.put("/api/font", authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: font, error: updateError } = await supabase.from("fonts").update({ name }).eq("font_id", id).select("*");
+    const { data: font, error: updateError } = await supabase.from("fonts").update({ name, is_develope: isDevelope }).eq("font_id", id).select("*");
 
     if (updateError) {
       console.error("Update error:", updateError);

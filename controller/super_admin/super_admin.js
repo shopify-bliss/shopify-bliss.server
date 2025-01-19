@@ -84,6 +84,8 @@ router.post("/api/add-admin", authenticateToken, async (req, res) => {
       }
     }
 
+    console.log(userCheckError)
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // const defaultRoleId = "0057ae60-509f-40de-a637-b2b6fdc1569e";

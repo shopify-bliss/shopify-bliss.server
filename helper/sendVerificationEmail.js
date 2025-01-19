@@ -6,10 +6,14 @@ import supabase from "./../config/supabase.js";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
+  // eslint-disable-next-line no-undef
   service: process.env.EMAIL_SERVICE,
+  // eslint-disable-next-line no-undef
   port: process.env.EMAIL_PORT,
   auth: {
+    // eslint-disable-next-line no-undef
     user: process.env.EMAIL_USER,
+    // eslint-disable-next-line no-undef
     pass: process.env.EMAIL_PASS,
   },
 });
@@ -34,6 +38,7 @@ export const sendVerificationEmail = async (email) => {
 
     // Konfigurasi email
     const mailOptions = {
+      // eslint-disable-next-line no-undef
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Verify Your Email",

@@ -45,6 +45,8 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
+    console.log("Role exists:", roleExists);
+
     const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role_id", roleID).single();
 
     if (accessError === null && existingAccess) {
@@ -177,6 +179,9 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
+    console.log("Menu exists:", menuExists);
+    
+
     // Validasi apakah role_id dengan menuID ada
     const { data: roleExists, error: roleError } = await supabase.from("roles").select("role_id").eq("role_id", roleID).single();
 
@@ -188,7 +193,7 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role", role).single();
+    const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role_id", roleID).single();
 
     if (accessError === null && existingAccess) {
       return res.status(400).json({

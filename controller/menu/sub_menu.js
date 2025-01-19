@@ -24,7 +24,7 @@ router.post("/api/sub-menu", authenticateToken, async (req, res) => {
     const { menuID, name, defaults, isDevelope } = req.body;
 
     // Validasi input
-    if (!menuID || !name || defaults === undefined || !isDevelope) {
+    if (!menuID || !name || defaults === undefined) {
       return res.status(400).json({
         success: false,
         message: "menuID, name, and defaults are required.",
@@ -166,7 +166,7 @@ router.put("/api/sub-menu", authenticateToken, async (req, res) => {
     const { name, defaults, menuID, isDevelope } = req.body;
 
     // Validasi input
-    if (!menuID || !name || defaults === undefined || !isDevelope) {
+    if (!menuID || !name || defaults === undefined) {
       return res.status(400).json({
         success: false,
         message: "menuID, name, and defaults are required.",
@@ -271,6 +271,8 @@ router.delete("/api/sub-menu", authenticateToken, async (req, res) => {
           message: "Failed to update another sub-menu to default.",
         });
       }
+
+      console.log("Updated sub-menu:", updatedSubMenu);
     }
 
     return res.status(200).json({
