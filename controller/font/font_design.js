@@ -48,7 +48,7 @@ router.post("/api/font-design", authenticateToken, async (req, res) => {
 });
 
 // Retrieve all font designs
-router.get("/api/font-design", async (req, res) => {
+router.get("/api/font-design",authenticateToken, async (req, res) => {
   try {
     const { data: fontDesigns, error: getError } = await supabase
       .from("font_designs")
@@ -85,7 +85,7 @@ router.get("/api/font-design", async (req, res) => {
 });
 
 // Retrieve font design by ID
-router.get("/api/font-design-id", async (req, res) => {
+router.get("/api/font-design-id",authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 

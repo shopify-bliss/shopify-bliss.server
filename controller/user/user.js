@@ -175,6 +175,76 @@ router.put("/api/update-password", async (req, res) => {
   }
 });
 
+router.put("/api/forgot-password", async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    const { error: emailError } = await supabase.from("users").select("email").eq("email", email).single();
+
+    if (emailError) {
+      return res.status(404).json({ message: "Email not found." });
+    }
+
+    // Validasi password
+    const passwordCriteria = {
+      minLength: /.{8,}/,
+      lowercase: /[a-z]/,
+      uppercase: /[A-Z]/,
+      number: /\d/,
+      specialCharacter: /[!@#$%^&*(),.?":{}|<>]/,
+    };
+
+    if (!passwordCriteria.minLength.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long.",
+      });
+    } else if (!passwordCriteria.lowercase.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must contain at least one lowercase letter.",
+      });
+    } else if (!passwordCriteria.uppercase.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must contain at least one uppercase letter.",
+      });
+    } else if (!passwordCriteria.number.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must contain at least one number.",
+      });
+    } else if (!passwordCriteria.specialCharacter.test(newPassword)) {
+      return res.status(400).json({
+        message: "Password must contain at least one special character.",
+      });
+    }
+
+    // Hash password baru
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const updated_at = moment().format("YYYY-MM-DD HH:mm:ss");
+
+    // Update password di database
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({
+        password: hashedNewPassword,
+        updated_at: updated_at,
+      })
+      .eq("email", email);
+
+    if (updateError) {
+      console.error("Update error:", updateError);
+      return res.status(500).json({ message: "Failed to update password." });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Password has been updated successfully.",
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+});
+
 router.get("/api/all-user", authenticateToken, async (req, res) => {
   try {
     const { data: users, error } = await supabase.from("users").select(`*, roles(*)`);
