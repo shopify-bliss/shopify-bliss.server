@@ -146,4 +146,39 @@ router.get("/api/ai-builder-id-builder", authenticateToken, async (req, res) => 
   }
 });
 
+router.delete("/api/ai-builder", authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Ai Builder ID is required",
+      });
+    }
+
+    const { data: aiBuilder, error: deleteError } = await supabase.from("ai_builders").delete().eq("ai_builder_id", id);
+
+    if (deleteError) {
+      console.error("Delete error:", deleteError);
+      return res.status(500).json({
+        success: false,
+        message: deleteError.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Ai Builder has been deleted",
+      data: aiBuilder,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 export default router;

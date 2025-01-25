@@ -55,7 +55,7 @@ router.post("/api/brand", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/api/brand", async (req, res) => {
+router.get("/api/brand", authenticateToken, async (req, res) => {
   try {
     const { data: brands, error: getError } = await supabase.from("brands").select("*").order("created_at", { ascending: true });
 
@@ -81,7 +81,7 @@ router.get("/api/brand", async (req, res) => {
   }
 });
 
-router.get("/api/brand-id", async (req, res) => {
+router.get("/api/brand-id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 

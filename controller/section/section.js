@@ -21,12 +21,13 @@ router.post("/api/section-templates", authenticateToken, async (req, res) => {
       });
     }
 
-    const { name } = req.body;
+    const { name, isDevelope } = req.body;
 
     const { data: section, error: insertError } = await supabase
       .from("section_templates")
       .insert({
         name: name,
+        is_develope: isDevelope,
       })
       .select("*");
 
@@ -51,7 +52,7 @@ router.post("/api/section-templates", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/api/section-templates", async (req, res) => {
+router.get("/api/section-templates", authenticateToken,async (req, res) => {
   try {
     const { data: sections, error: getError } = await supabase.from("section_templates").select("*").order("created_at", { ascending: true });
 
@@ -75,7 +76,7 @@ router.get("/api/section-templates", async (req, res) => {
   }
 });
 
-router.get("/api/section-templates-id", async (req, res) => {
+router.get("/api/section-templates-id", authenticateToken,async (req, res) => {
   try {
     const { id } = req.query;
 
@@ -136,12 +137,13 @@ router.put("/api/section-templates", authenticateToken, async (req, res) => {
       });
     }
 
-    const { name } = req.body;
+    const { name, isDevelope } = req.body;
 
     const { data: section, error: updateError } = await supabase
       .from("section_templates")
       .update({
         name: name,
+        is_develope: isDevelope,
       })
       .eq("section_id", id)
       .select("*");

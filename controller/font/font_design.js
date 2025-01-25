@@ -12,7 +12,7 @@ const router = express.Router();
 // Create a new font design
 router.post("/api/font-design", authenticateToken, async (req, res) => {
   try {
-    const { font1_id, font2_id, brand_id, group } = req.body;
+    const { font1_id, font2_id, brand_id, group,isDevelope } = req.body;
 
     const { data: fontDesigns, error: insertError } = await supabase
       .from("font_designs")
@@ -21,6 +21,7 @@ router.post("/api/font-design", authenticateToken, async (req, res) => {
         font2_id,
         brand_id,
         group,
+        is_develope: isDevelope
       })
       .select("*");
 
@@ -143,7 +144,7 @@ router.put("/api/font-design", authenticateToken, async (req, res) => {
       });
     }
 
-    const { font1_id, font2_id, brand_id, group } = req.body;
+    const { font1_id, font2_id, brand_id, group, isDevelope } = req.body;
 
     const { data: fontDesign, error: updateError } = await supabase
       .from("font_designs")
@@ -152,6 +153,7 @@ router.put("/api/font-design", authenticateToken, async (req, res) => {
         font2_id,
         brand_id,
         group,
+        is_develope: isDevelope
       })
       .eq("font_designs_id", id)
       .select("*");

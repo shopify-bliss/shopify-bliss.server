@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post("/auth/role", authenticateToken, async (req, res) => {
   try {
-    const { roleName } = req.body;
+    const { roleName, icon } = req.body;
 
     if (req.user.role !== "admin") {
       return res.status(403).json({
@@ -41,6 +41,7 @@ router.post("/auth/role", authenticateToken, async (req, res) => {
       .from("roles")
       .insert({
         role_name: roleName,
+        icon: icon,
       })
       .select("*");
 
@@ -136,7 +137,7 @@ router.put("/auth/role", authenticateToken, async (req, res) => {
       });
     }
 
-    const { roleName } = req.body;
+    const { roleName,icon } = req.body;
 
     if (!roleName) {
       return res.status(400).json({
@@ -148,7 +149,8 @@ router.put("/auth/role", authenticateToken, async (req, res) => {
     const { data: role, error: updateError } = await supabase
       .from("roles")
       .update({ 
-        role_name: roleName 
+        role_name: roleName,
+        icon: icon, 
       })
       .eq("role_id", id)
       .select("*");

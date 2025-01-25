@@ -46,7 +46,7 @@ router.post("/api/color", authenticateToken, async (req, res) => {
 });
 
 // Retrieve all colors
-router.get("/api/color", async (req, res) => {
+router.get("/api/color",authenticateToken, async (req, res) => {
   try {
     const { data: colors, error: getError } = await supabase.from("colors").select("*").order("created_at", { ascending: true });
 
@@ -73,7 +73,7 @@ router.get("/api/color", async (req, res) => {
 });
 
 // Retrieve color by ID
-router.get("/api/color-id", async (req, res) => {
+router.get("/api/color-id",authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 

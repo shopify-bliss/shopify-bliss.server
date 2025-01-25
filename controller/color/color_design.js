@@ -12,7 +12,7 @@ const router = express.Router();
 // Create a new color design
 router.post("/api/color-design", authenticateToken, async (req, res) => {
   try {
-    const { color1_id, color2_id, color3_id, brand_id } = req.body;
+    const { color1_id, color2_id, color3_id, brand_id, isDevelope } = req.body;
 
     const { data: colorDesigns, error: insertError } = await supabase
       .from("color_designs")
@@ -21,6 +21,7 @@ router.post("/api/color-design", authenticateToken, async (req, res) => {
         color2_id,
         color3_id,
         brand_id,
+        is_develope: isDevelope,
       })
       .select("*");
 

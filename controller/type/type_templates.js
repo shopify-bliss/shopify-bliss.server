@@ -53,7 +53,7 @@ router.post("/api/type-templates", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/api/type-templates", async (req, res) => {
+router.get("/api/type-templates", authenticateToken, async (req, res) => {
   try {
     const { data: typeTemplates, error: selectError } = await supabase.from("page_templates").select("*").order("created_at", { ascending: true });
 
@@ -84,7 +84,7 @@ router.get("/api/type-templates", async (req, res) => {
   }
 });
 
-router.get("/api/type-templates-id", async (req, res) => {
+router.get("/api/type-templates-id", authenticateToken, async (req, res) => {
   const { id } = req.query;
 
   // Memastikan ID disediakan dan valid
