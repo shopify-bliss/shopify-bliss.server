@@ -11,21 +11,23 @@ const router = express.Router();
 
 router.post("/api/type-templates", authenticateToken, async (req, res) => {
   try {
-    if (req.user.role !== "admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
       });
     }
 
-    const { type, icon, nameClass } = req.body;
+    const { type, icon } = req.body;
 
     const { data: typeTemplate, error: insertError } = await supabase
-      .from("type_templates")
+      .from("page_templates")
       .insert({
         type: type,
         icon: icon,
-        name_class: nameClass,
       })
       .select("*");
 
@@ -51,9 +53,9 @@ router.post("/api/type-templates", authenticateToken, async (req, res) => {
   }
 });
 
-router.get("/api/type-templates", async (req, res) => {
+router.get("/api/type-templates", authenticateToken, async (req, res) => {
   try {
-    const { data: typeTemplates, error: selectError } = await supabase.from("type_templates").select("*").order("created_at", { ascending: true });
+    const { data: typeTemplates, error: selectError } = await supabase.from("page_templates").select("*").order("created_at", { ascending: true });
 
     if (selectError) {
       console.error("Select error:", selectError);
@@ -82,7 +84,7 @@ router.get("/api/type-templates", async (req, res) => {
   }
 });
 
-router.get("/api/type-templates-id", async (req, res) => {
+router.get("/api/type-templates-id", authenticateToken, async (req, res) => {
   const { id } = req.query;
 
   // Memastikan ID disediakan dan valid
@@ -92,7 +94,7 @@ router.get("/api/type-templates-id", async (req, res) => {
 
   try {
     // Ambil data dari Supabase berdasarkan ID
-    const { data: item, error } = await supabase.from("type_templates").select("*").eq("type_template_id", id).single();
+    const { data: item, error } = await supabase.from("page_templates").select("*").eq("type_template_id", id).single();
 
     // Tangani kesalahan yang terjadi saat query ke Supabase
     if (error) {
@@ -122,14 +124,23 @@ router.put("/api/type-templates", authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, message: "ID is required" });
     }
 
-    const { type, icon, nameClass } = req.body;
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have access to this resource",
+      });
+    }
+
+    const { type, icon } = req.body;
 
     const { data: typeTemplate, error: updateError } = await supabase
-      .from("type_templates")
+      .from("page_templates")
       .update({
         type: type,
         icon: icon,
-        name_class: nameClass,
       })
       .eq("type_template_id", id)
       .select("*");
@@ -165,7 +176,17 @@ router.delete("/api/type-templates", authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, message: "ID is required" });
     }
 
-    const { data: typeTemplate, error: deleteError } = await supabase.from("type_templates").delete().eq("type_template_id", id).select("*");
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have access to this resource",
+      });
+    }
+
+    const { data: typeTemplate, error: deleteError } = await supabase.from("page_templates").delete().eq("type_template_id", id).select("*");
 
     if (deleteError) {
       console.error("Delete error:", deleteError);

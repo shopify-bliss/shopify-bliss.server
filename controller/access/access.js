@@ -11,9 +11,12 @@ const router = express.Router();
 
 router.post("/api/access-management", authenticateToken, async (req, res) => {
   try {
-    const { menuID, role, accessMenu } = req.body;
+    const { menuID, roleID } = req.body;
 
-    if (req.user.role !== "admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    // const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
@@ -23,7 +26,7 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
     // Validasi apakah menu dengan menuID ada
     const { data: menuExists, error: menuError } = await supabase.from("menus").select("menu_id").eq("menu_id", menuID).single();
 
-    if (menuError) {
+    if (menuError || !menuExists) {
       console.error("Menu query error:", menuError);
       return res.status(400).json({
         success: false,
@@ -31,11 +34,32 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
+    // Validasi apakah role dengan roleID ada
+    const { data: roleExists, error: roleError } = await supabase.from("roles").select("*").eq("role_id", roleID).single();
+
+    if (roleError) {
+      console.error("Role query error:", roleError);
+      return res.status(400).json({
+        success: false,
+        message: "Role not Found.",
+      });
+    }
+
+    console.log("Role exists:", roleExists);
+
+    const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role_id", roleID).single();
+
+    if (accessError === null && existingAccess) {
+      return res.status(400).json({
+        success: false,
+        message: "Access for this menu and role already exists.",
+      });
+    }
+
     const { data: access, error: insertError } = await supabase
       .from("access_management")
       .insert({
-        role: role,
-        access_menu: accessMenu,
+        role_id: roleID,
         menu_id: menuID,
       })
       .select("*");
@@ -64,7 +88,7 @@ router.post("/api/access-management", authenticateToken, async (req, res) => {
 
 router.get("/api/access-management", authenticateToken, async (req, res) => {
   try {
-    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*)`);
+    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*),roles(*)`);
 
     if (fetchError) {
       console.error("Fetch error:", fetchError);
@@ -98,7 +122,7 @@ router.get("/api/access-management-id", authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*)`).eq("access_id", id);
+    const { data: access, error: fetchError } = await supabase.from("access_management").select(`*, menus(*),roles(*)`).eq("access_id", id);
 
     if (fetchError) {
       console.error("Fetch error:", fetchError);
@@ -132,9 +156,12 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
-    const { role, accessMenu, menuID } = req.body;
+    const { roleID, menuID } = req.body;
 
-    if (req.user.role !== "admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    // const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",
@@ -152,11 +179,33 @@ router.put("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
+    console.log("Menu exists:", menuExists);
+    
+
+    // Validasi apakah role_id dengan menuID ada
+    const { data: roleExists, error: roleError } = await supabase.from("roles").select("role_id").eq("role_id", roleID).single();
+
+    if (roleError || !roleExists) {
+      console.error("Role query error:", roleError);
+      return res.status(400).json({
+        success: false,
+        message: "Role not Found.",
+      });
+    }
+
+    const { data: existingAccess, error: accessError } = await supabase.from("access_management").select("*").eq("menu_id", menuID).eq("role_id", roleID).single();
+
+    if (accessError === null && existingAccess) {
+      return res.status(400).json({
+        success: false,
+        message: "Access for this menu and role already exists.",
+      });
+    }
+
     const { data: access, error: updateError } = await supabase
       .from("access_management")
       .update({
-        role: role,
-        access_menu: accessMenu,
+        role_id: roleID,
         menu_id: menuID,
       })
       .eq("access_id", id)
@@ -194,7 +243,9 @@ router.delete("/api/access-management", authenticateToken, async (req, res) => {
       });
     }
 
-    if (req.user.role !== "admin") {
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+
+    if (req.user.role_id !== superAdminID) {
       return res.status(403).json({
         success: false,
         message: "Forbidden: You do not have access to this resource",

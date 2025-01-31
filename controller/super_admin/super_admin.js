@@ -2,24 +2,28 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import moment from "moment-timezone";
 
-import supabase from "./../../config/supabase.js";
-import { sendVerificationEmail } from "./../../helper/sendVerificationEmail.js";
 import configureMiddleware from "./../../config/middleware.js";
+import supabase from "./../../config/supabase.js";
+
+import authenticateToken from "./../../helper/token.js";
 
 const app = express();
 configureMiddleware(app);
 const router = express.Router();
 
-router.post("/auth/registration", async (req, res) => {
+router.post("/api/add-admin", authenticateToken, async (req, res) => {
   try {
-    const { username, email, password, phoneNumber } = req.body;
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
 
-    // Validasi input
-    if (!username || !email || !password || !phoneNumber) {
-      return res.status(400).json({
-        message: "All fields are required.",
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have access to this resource",
       });
     }
+
+    const { username, email, password, phoneNumber, roleID } = req.body;
 
     // Validasi nomor telepon
     const phoneRegex = /^[0-9]{10,15}$/;
@@ -61,7 +65,6 @@ router.post("/auth/registration", async (req, res) => {
     }
 
     const created_at = moment().tz("Asia/Jakarta").format("YYYY-MM-DD HH:mm:ss");
-    const expires_at = moment().tz("Asia/Jakarta").add(10, "minutes").format("YYYY-MM-DD HH:mm:ss");
 
     // Gabungan validasi email dan username
     const { data: existingUser, error: userCheckError } = await supabase.from("users").select("email, username").or(`email.eq.${email},username.eq.${username}`).single();
@@ -81,48 +84,92 @@ router.post("/auth/registration", async (req, res) => {
       }
     }
 
-    if (userCheckError && userCheckError.code !== "PGRST116") {
-      // Handle unexpected error
-      throw new Error(userCheckError.message);
-    }
+    console.log(userCheckError)
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Hardcoded role_id untuk "customer"
-    const defaultRoleId = "cebccb98-7ef0-4184-95b9-7320329f21d3";
+    // const defaultRoleId = "0057ae60-509f-40de-a637-b2b6fdc1569e";
 
-    // Simpan pengguna baru ke database
-    const { data, error } = await supabase.from("users").insert([
-      {
-        username,
-        email,
+    const { data: user, error: insertError } = await supabase
+      .from("users")
+      .insert({
+        username: username,
+        email: email,
         password: hashedPassword,
-        role_id: defaultRoleId,
-        created_at,
+        role_id: roleID,
+        created_at: created_at,
         updated_at: created_at,
-        is_verified: false,
-        expires_at,
+        is_verified: true,
+        expires_at: null,
+        verification_code: null,
         phone_number: phoneNumber,
         avatar: "polar-bear.png",
-      },
-    ]);
+      })
+      .select("*");
 
-    console.log("data", data);
-    
-    if (error) {
-      throw new Error(error.message);
+    if (insertError) {
+      console.error("Insert error:", insertError);
+      return res.status(500).json({
+        success: false,
+        message: insertError.message,
+      });
     }
 
-    // Kirim email verifikasi
-    await sendVerificationEmail(email);
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Registration successful. Please check your email to verify your account.",
+      message: "Admin has been added",
+      data: user,
     });
   } catch (error) {
-    console.error("Error during registration:", error);
-    res.status(500).json({ message: "An error occurred during registration", error });
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
+router.put("/api/role-update", authenticateToken, async (req, res) => {
+  try {
+    const { userID, role } = req.body;
+
+    const superAdminID = "3de65f44-6341-4b4d-8d9f-c8ca3ea80b80";
+    const adminID = "0057ae60-509f-40de-a637-b2b6fdc1569e";
+
+    if (req.user.role_id !== superAdminID && req.user.role_id !== adminID) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You do not have access to this resource",
+      });
+    }
+
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .update({
+        role_id: role,
+      })
+      .eq("user_id", userID)
+      .single()
+      .select("*");
+
+    if (userError) {
+      console.error("Update error:", userError);
+      return res.status(500).json({
+        message: userError.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User role has been updated",
+      data: user,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 });
 

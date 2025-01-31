@@ -9,19 +9,21 @@ const app = express();
 configureMiddleware(app);
 const router = express.Router();
 
-// Create a new font
-router.post("/api/font", authenticateToken, async (req, res) => {
+// Create a new color design
+router.post("/api/color-design", authenticateToken, async (req, res) => {
   try {
-    const { name, isDevelope } = req.body;
+    const { color1_id, color2_id, color3_id, brand_id, isDevelope } = req.body;
 
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        message: "Bad request: Name is required",
-      });
-    }
-
-    const { data: fonts, error: insertError } = await supabase.from("fonts").insert({ name, is_develope: isDevelope }).select("*");
+    const { data: colorDesigns, error: insertError } = await supabase
+      .from("color_designs")
+      .insert({
+        color1_id,
+        color2_id,
+        color3_id,
+        brand_id,
+        is_develope: isDevelope,
+      })
+      .select("*");
 
     if (insertError) {
       console.error("Insert error:", insertError);
@@ -33,8 +35,8 @@ router.post("/api/font", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Font has been added",
-      data: fonts,
+      message: "Color design has been added",
+      data: colorDesigns,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -45,10 +47,21 @@ router.post("/api/font", authenticateToken, async (req, res) => {
   }
 });
 
-// Retrieve all fonts
-router.get("/api/fonts",authenticateToken, async (req, res) => {
+// Retrieve all color designs
+router.get("/api/color-design", authenticateToken, async (req, res) => {
   try {
-    const { data: fonts, error: getError } = await supabase.from("fonts").select("*").order("created_at", { ascending: true });
+    const { data: colorDesigns, error: getError } = await supabase
+      .from("color_designs")
+      .select(
+        `
+        *,
+        color1:colors!color_designs_color1_id_fkey(*),
+        color2:colors!color_designs_color2_id_fkey(*),
+        color3:colors!color_designs_color3_id_fkey(*),
+        brands(*)
+      `
+      )
+      .order("created_at", { ascending: true });
 
     if (getError) {
       console.error("Get error:", getError);
@@ -60,8 +73,8 @@ router.get("/api/fonts",authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Fonts have been retrieved",
-      data: fonts,
+      message: "Color designs have been retrieved",
+      data: colorDesigns,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -72,8 +85,8 @@ router.get("/api/fonts",authenticateToken, async (req, res) => {
   }
 });
 
-// Retrieve font by ID
-router.get("/api/font",authenticateToken, async (req, res) => {
+// Retrieve color design by ID
+router.get("/api/color-design-id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 
@@ -84,7 +97,18 @@ router.get("/api/font",authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: font, error: getError } = await supabase.from("fonts").select("*").eq("font_id", id).single();
+    const { data: colorDesign, error: getError } = await supabase
+      .from("color_designs")
+      .select(
+        `
+      *,
+      color1:colors!color_designs_color1_id_fkey(*),
+      color2:colors!color_designs_color2_id_fkey(*),
+      color3:colors!color_designs_color3_id_fkey(*),
+      brands(*)
+    `
+      )
+      .eq("color_design_id", id);
 
     if (getError) {
       console.error("Get error:", getError);
@@ -94,17 +118,17 @@ router.get("/api/font",authenticateToken, async (req, res) => {
       });
     }
 
-    if (!font) {
+    if (colorDesign.length === 0) {
       return res.status(404).json({
         success: false,
-        message: `Font with id = ${id} not found`,
+        message: `Color design with id = ${id} not found`,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Font has been retrieved",
-      data: font,
+      message: "Color design has been retrieved",
+      data: colorDesign,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -115,11 +139,10 @@ router.get("/api/font",authenticateToken, async (req, res) => {
   }
 });
 
-// Update font by ID
-router.put("/api/font", authenticateToken, async (req, res) => {
+// Update color design by ID
+router.put("/api/color-design", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
-    const { name, isDevelope } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -128,14 +151,18 @@ router.put("/api/font", authenticateToken, async (req, res) => {
       });
     }
 
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        message: "Bad request: Name is required",
-      });
-    }
+    const { color1_id, color2_id, color3_id, brand_id } = req.body;
 
-    const { data: font, error: updateError } = await supabase.from("fonts").update({ name, is_develope: isDevelope }).eq("font_id", id).select("*");
+    const { data: colorDesign, error: updateError } = await supabase
+      .from("color_designs")
+      .update({
+        color1_id,
+        color2_id,
+        color3_id,
+        brand_id,
+      })
+      .eq("color_design_id", id)
+      .select("*");
 
     if (updateError) {
       console.error("Update error:", updateError);
@@ -147,8 +174,8 @@ router.put("/api/font", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Font has been updated",
-      data: font,
+      message: "Color design has been updated",
+      data: colorDesign,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -159,8 +186,8 @@ router.put("/api/font", authenticateToken, async (req, res) => {
   }
 });
 
-// Delete font by ID
-router.delete("/api/font", authenticateToken, async (req, res) => {
+// Delete color design by ID
+router.delete("/api/color-design", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 
@@ -171,7 +198,7 @@ router.delete("/api/font", authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: font, error: deleteError } = await supabase.from("fonts").delete().eq("font_id", id).select("*");
+    const { data: colorDesign, error: deleteError } = await supabase.from("color_designs").delete().eq("color_design_id", id).select("*");
 
     if (deleteError) {
       console.error("Delete error:", deleteError);
@@ -183,8 +210,8 @@ router.delete("/api/font", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Font has been deleted",
-      data: font,
+      message: "Color design has been deleted",
+      data: colorDesign,
     });
   } catch (error) {
     console.error("Error:", error);

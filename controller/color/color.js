@@ -9,19 +9,19 @@ const app = express();
 configureMiddleware(app);
 const router = express.Router();
 
-// Create a new font
-router.post("/api/font", authenticateToken, async (req, res) => {
+// Create a new color
+router.post("/api/color", authenticateToken, async (req, res) => {
   try {
-    const { name, isDevelope } = req.body;
+    const { color, isDevelope } = req.body;
 
-    if (!name) {
+    if (!color) {
       return res.status(400).json({
         success: false,
-        message: "Bad request: Name is required",
+        message: "Bad request: Color is required",
       });
     }
 
-    const { data: fonts, error: insertError } = await supabase.from("fonts").insert({ name, is_develope: isDevelope }).select("*");
+    const { data: newColor, error: insertError } = await supabase.from("colors").insert({ color, is_develope: isDevelope }).select("*");
 
     if (insertError) {
       console.error("Insert error:", insertError);
@@ -33,8 +33,8 @@ router.post("/api/font", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Font has been added",
-      data: fonts,
+      message: "Color has been added",
+      data: newColor,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -45,10 +45,10 @@ router.post("/api/font", authenticateToken, async (req, res) => {
   }
 });
 
-// Retrieve all fonts
-router.get("/api/fonts",authenticateToken, async (req, res) => {
+// Retrieve all colors
+router.get("/api/color",authenticateToken, async (req, res) => {
   try {
-    const { data: fonts, error: getError } = await supabase.from("fonts").select("*").order("created_at", { ascending: true });
+    const { data: colors, error: getError } = await supabase.from("colors").select("*").order("created_at", { ascending: true });
 
     if (getError) {
       console.error("Get error:", getError);
@@ -60,8 +60,8 @@ router.get("/api/fonts",authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Fonts have been retrieved",
-      data: fonts,
+      message: "Colors have been retrieved",
+      data: colors,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -72,8 +72,8 @@ router.get("/api/fonts",authenticateToken, async (req, res) => {
   }
 });
 
-// Retrieve font by ID
-router.get("/api/font",authenticateToken, async (req, res) => {
+// Retrieve color by ID
+router.get("/api/color-id",authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 
@@ -84,7 +84,7 @@ router.get("/api/font",authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: font, error: getError } = await supabase.from("fonts").select("*").eq("font_id", id).single();
+    const { data: color, error: getError } = await supabase.from("colors").select("*").eq("color_id", id).single();
 
     if (getError) {
       console.error("Get error:", getError);
@@ -94,17 +94,17 @@ router.get("/api/font",authenticateToken, async (req, res) => {
       });
     }
 
-    if (!font) {
+    if (!color) {
       return res.status(404).json({
         success: false,
-        message: `Font with id = ${id} not found`,
+        message: `Color with id = ${id} not found`,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Font has been retrieved",
-      data: font,
+      message: "Color has been retrieved",
+      data: color,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -115,11 +115,11 @@ router.get("/api/font",authenticateToken, async (req, res) => {
   }
 });
 
-// Update font by ID
-router.put("/api/font", authenticateToken, async (req, res) => {
+// Update color by ID
+router.put("/api/color", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
-    const { name, isDevelope } = req.body;
+    const { color, isDevelope } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -128,14 +128,14 @@ router.put("/api/font", authenticateToken, async (req, res) => {
       });
     }
 
-    if (!name) {
+    if (!color) {
       return res.status(400).json({
         success: false,
-        message: "Bad request: Name is required",
+        message: "Bad request: Color is required",
       });
     }
 
-    const { data: font, error: updateError } = await supabase.from("fonts").update({ name, is_develope: isDevelope }).eq("font_id", id).select("*");
+    const { data: updatedColor, error: updateError } = await supabase.from("colors").update({ color, is_develope: isDevelope }).eq("color_id", id).select("*");
 
     if (updateError) {
       console.error("Update error:", updateError);
@@ -147,8 +147,8 @@ router.put("/api/font", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Font has been updated",
-      data: font,
+      message: "Color has been updated",
+      data: updatedColor,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -159,8 +159,8 @@ router.put("/api/font", authenticateToken, async (req, res) => {
   }
 });
 
-// Delete font by ID
-router.delete("/api/font", authenticateToken, async (req, res) => {
+// Delete color by ID
+router.delete("/api/color", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 
@@ -171,7 +171,7 @@ router.delete("/api/font", authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: font, error: deleteError } = await supabase.from("fonts").delete().eq("font_id", id).select("*");
+    const { data: deletedColor, error: deleteError } = await supabase.from("colors").delete().eq("color_id", id).select("*");
 
     if (deleteError) {
       console.error("Delete error:", deleteError);
@@ -183,8 +183,8 @@ router.delete("/api/font", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Font has been deleted",
-      data: font,
+      message: "Color has been deleted",
+      data: deletedColor,
     });
   } catch (error) {
     console.error("Error:", error);

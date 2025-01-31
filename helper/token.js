@@ -16,18 +16,24 @@ const authenticateToken = (req, res, next) => {
       });
     }
 
-    jwt.verify(tokenHeader, process.env.JWT_SECRET, (err, user) => {
-      if (err) {
-        return res.status(403).json({
-          success: false,
-          message: "Invalid token",
-        });
-      }
+    jwt.verify(
+      tokenHeader,
+      // eslint-disable-next-line no-undef
+      process.env.JWT_SECRET,
+      (err, user) => {
+        if (err) {
+          return res.status(403).json({
+            success: false,
+            message: "Invalid token",
+          });
+        }
 
-      req.user = user; // Tambahkan user ke request
-      next();
-    });
+        req.user = user; // Tambahkan user ke request
+        next();
+      }
+    );
   } catch (err) {
+    console.log(err);
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",

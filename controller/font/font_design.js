@@ -9,19 +9,21 @@ const app = express();
 configureMiddleware(app);
 const router = express.Router();
 
-// Create a new font
-router.post("/api/font", authenticateToken, async (req, res) => {
+// Create a new font design
+router.post("/api/font-design", authenticateToken, async (req, res) => {
   try {
-    const { name, isDevelope } = req.body;
+    const { font1_id, font2_id, brand_id, group,isDevelope } = req.body;
 
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        message: "Bad request: Name is required",
-      });
-    }
-
-    const { data: fonts, error: insertError } = await supabase.from("fonts").insert({ name, is_develope: isDevelope }).select("*");
+    const { data: fontDesigns, error: insertError } = await supabase
+      .from("font_designs")
+      .insert({
+        font1_id,
+        font2_id,
+        brand_id,
+        group,
+        is_develope: isDevelope
+      })
+      .select("*");
 
     if (insertError) {
       console.error("Insert error:", insertError);
@@ -33,8 +35,8 @@ router.post("/api/font", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Font has been added",
-      data: fonts,
+      message: "Font design has been added",
+      data: fontDesigns,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -45,10 +47,20 @@ router.post("/api/font", authenticateToken, async (req, res) => {
   }
 });
 
-// Retrieve all fonts
-router.get("/api/fonts",authenticateToken, async (req, res) => {
+// Retrieve all font designs
+router.get("/api/font-design",authenticateToken, async (req, res) => {
   try {
-    const { data: fonts, error: getError } = await supabase.from("fonts").select("*").order("created_at", { ascending: true });
+    const { data: fontDesigns, error: getError } = await supabase
+      .from("font_designs")
+      .select(
+        `
+        *,
+        font1:fonts!font_designs_font_id_fkey(*),
+        font2:fonts!font_designs_font2_id_fkey(*),
+        brands(*)
+      `
+      )
+      .order("created_at", { ascending: true });
 
     if (getError) {
       console.error("Get error:", getError);
@@ -60,8 +72,8 @@ router.get("/api/fonts",authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Fonts have been retrieved",
-      data: fonts,
+      message: "Font designs have been retrieved",
+      data: fontDesigns,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -72,8 +84,8 @@ router.get("/api/fonts",authenticateToken, async (req, res) => {
   }
 });
 
-// Retrieve font by ID
-router.get("/api/font",authenticateToken, async (req, res) => {
+// Retrieve font design by ID
+router.get("/api/font-design-id",authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 
@@ -84,7 +96,12 @@ router.get("/api/font",authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: font, error: getError } = await supabase.from("fonts").select("*").eq("font_id", id).single();
+    const { data: fontDesign, error: getError } = await supabase.from("font_designs").select( `
+      *,
+      font1:fonts!font_designs_font_id_fkey(*),
+      font2:fonts!font_designs_font2_id_fkey(*),
+      brands(*)
+    `).eq("font_designs_id", id);
 
     if (getError) {
       console.error("Get error:", getError);
@@ -94,17 +111,17 @@ router.get("/api/font",authenticateToken, async (req, res) => {
       });
     }
 
-    if (!font) {
+    if (fontDesign.length === 0) {
       return res.status(404).json({
         success: false,
-        message: `Font with id = ${id} not found`,
+        message: `Font design with id = ${id} not found`,
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Font has been retrieved",
-      data: font,
+      message: "Font design has been retrieved",
+      data: fontDesign,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -115,11 +132,10 @@ router.get("/api/font",authenticateToken, async (req, res) => {
   }
 });
 
-// Update font by ID
-router.put("/api/font", authenticateToken, async (req, res) => {
+// Update font design by ID
+router.put("/api/font-design", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
-    const { name, isDevelope } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -128,14 +144,19 @@ router.put("/api/font", authenticateToken, async (req, res) => {
       });
     }
 
-    if (!name) {
-      return res.status(400).json({
-        success: false,
-        message: "Bad request: Name is required",
-      });
-    }
+    const { font1_id, font2_id, brand_id, group, isDevelope } = req.body;
 
-    const { data: font, error: updateError } = await supabase.from("fonts").update({ name, is_develope: isDevelope }).eq("font_id", id).select("*");
+    const { data: fontDesign, error: updateError } = await supabase
+      .from("font_designs")
+      .update({
+        font1_id,
+        font2_id,
+        brand_id,
+        group,
+        is_develope: isDevelope
+      })
+      .eq("font_designs_id", id)
+      .select("*");
 
     if (updateError) {
       console.error("Update error:", updateError);
@@ -147,8 +168,8 @@ router.put("/api/font", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Font has been updated",
-      data: font,
+      message: "Font design has been updated",
+      data: fontDesign,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -159,8 +180,8 @@ router.put("/api/font", authenticateToken, async (req, res) => {
   }
 });
 
-// Delete font by ID
-router.delete("/api/font", authenticateToken, async (req, res) => {
+// Delete font design by ID
+router.delete("/api/font-design", authenticateToken, async (req, res) => {
   try {
     const { id } = req.query;
 
@@ -171,7 +192,7 @@ router.delete("/api/font", authenticateToken, async (req, res) => {
       });
     }
 
-    const { data: font, error: deleteError } = await supabase.from("fonts").delete().eq("font_id", id).select("*");
+    const { data: fontDesign, error: deleteError } = await supabase.from("font_designs").delete().eq("font_designs_id", id).select("*");
 
     if (deleteError) {
       console.error("Delete error:", deleteError);
@@ -183,8 +204,8 @@ router.delete("/api/font", authenticateToken, async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Font has been deleted",
-      data: font,
+      message: "Font design has been deleted",
+      data: fontDesign,
     });
   } catch (error) {
     console.error("Error:", error);
